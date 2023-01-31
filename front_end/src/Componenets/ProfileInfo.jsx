@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-
 import Avatar from "@mui/material/Avatar";
-import SettingsIcon from "@mui/icons-material/Settings";
-import { MailOutline } from "@mui/icons-material";
+import { useEffect } from "react";
+import APIService from "./APIService";
 
 const Container = styled.div`
   display: flex;
@@ -12,13 +11,12 @@ const Container = styled.div`
   justify-content: center;
   border-radius: 14px;
   padding: 10px;
-  margin: 10px;
+  margin: 20px 50px 20px 50px;
 `;
 const AvatarContainer = styled.div`
   display: flex;
   justify-content: center;
   margin: 10px;
-  position: relative;
 `;
 const InfoContainer = styled.div`
   width: 50%;
@@ -26,6 +24,7 @@ const InfoContainer = styled.div`
 const InfoItem = styled.div`
   display: flex;
   align-items: center;
+  margin:10px
 `;
 const Button = styled.button`
   color: white;
@@ -39,36 +38,38 @@ const Button = styled.button`
   margin-right: 10px;
 `;
 export default function ProfileInfo() {
+  const [user,setuser]=useState({
+    id:0,
+    nom:'',
+    prenom:'',
+    email:'',
+    tlp:'',
+  });
+  useEffect(() => {
+  APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);});},[])
   return (
     <Container>
       <AvatarContainer>
         <Avatar
-          sx={{ width: 100, height: 100 }}
+          sx={{ width: 120, height: 120 }}
           src="https://ichef.bbci.co.uk/news/976/cpsprodpb/F382/production/_123883326_852a3a31-69d7-4849-81c7-8087bf630251.jpg"
         />
       </AvatarContainer>
       <InfoContainer>
         <InfoItem>
-          Maria_bn
-          <Button>modifier profile</Button>
-          <Avatar sx={{ width: 30, height: 30 }}>
-            <SettingsIcon />
-          </Avatar>
-          <Avatar sx={{ width: 30, height: 30 }}>
-            <MailOutline />
-          </Avatar>
+          {user.nom} {user.prenom}
         </InfoItem>
         <InfoItem>
-          Nom:
-          <label>Bahmane</label>
+          <label style={{marginRight:"10px"}}>Nom: </label>
+          <label>{user.nom}</label>
         </InfoItem>
         <InfoItem>
-          Prenom:
-          <label>Maria</label>
+          Prenom: 
+          <label>{user.prenom}</label>
         </InfoItem>
         <InfoItem>
-          Email:
-          <label>km_bahmane@esi.dz</label>
+          Email: 
+          <label>{user.email}</label>
         </InfoItem>
       </InfoContainer>
     </Container>

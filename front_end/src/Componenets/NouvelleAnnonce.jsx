@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link,useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import APIService from "./APIService";
 const Container = styled.div`
@@ -75,22 +76,33 @@ const NouvelleAnnonce = (props) => {
   const [description, setdesc] = useState();
   const [num_tlp, setnum_tlp] = useState();
   const [prix, setprix] = useState();
-  const [annonce, setannonce] = useState();
   const [surface, setsurface] = useState();
   const [id, setid] = useState(1);
-  
+  const [user,setuser]=useState({
+    id,
+    nom:'',
+    prenom:'',
+    email:'',
+    tlp:'',
+  });
+  let nav=useNavigate();
   useEffect(() => {
     APIService.GetCommunes(id).then(resp => setcommunes(resp)).catch(Error => console.log(Error));
-  }, [])
+    APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);setnum_tlp(user.tlp);});
+  }, [id,])
   const addAnnonce = () => {
-    APIService.AddAnnonce({ address, description, categorie, commune, type_bien, num_tlp, prix, surface }).then(resp => setannonce(resp));
-    if (images.length > 0) {
-      images.forEach((image, i) => {
-        const data = new FormData();
-        data.append("pic", image, image.name);
-        APIService.AddImage(data, annonce.id);
-      });
-    }
+    const id_user=user.id;
+    APIService.AddAnnonce({ address, description,id_user, categorie, commune, type_bien, num_tlp, prix, surface }).then(resp => {
+      if (images.length > 0) {
+        images.forEach((image, i) => {
+          const data = new FormData();
+          data.append("pic", image, image.name);
+          APIService.AddImage(data, resp.id);
+        });
+      };
+        nav('/profile');
+    }).catch(Error => alert("Erreur: Veuillez remplire ce qui monque"));;
+   
   }
 
   return (
@@ -99,7 +111,6 @@ const NouvelleAnnonce = (props) => {
       <AnnonceContainer>
         <CoteImage>
           <Titre>Ajouter des photos</Titre>
-
           <input
             name="pic"
             id="imgInput"
@@ -108,6 +119,7 @@ const NouvelleAnnonce = (props) => {
             style={{ display: "none" }}
             onChange={(event) => {
               images.push(event.target.files[0])
+              alert(`chargement de ${images.length} images`)
             }}
           />
           <Button>
@@ -171,15 +183,13 @@ const NouvelleAnnonce = (props) => {
             <Titre>Addresse :</Titre>
             <Input type="text" onChange={(e) => setaddress(e.target.value)} />
           </FormItem>
-          <FormItem style={{ height: "25%" }}>
-            <Image src="https://www.google.com/maps/d/thumbnail?mid=1iY3l53ZShgC6b35zl4L6YuhnWP0&hl=en_US" />
-          </FormItem>
+         {commune ? <iframe width="600" height="468" id="gmap_canvas" src={`https://maps.google.com/maps?q=${commune}&t=&z=13&ie=UTF8&iwloc=&output=embed`} frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>:null}
           <FormItem>
             <Button>Positionner sur le map</Button>
           </FormItem>
           <FormItem>
             <Titre>Description :</Titre>
-            <Input type="text" onChange={(e) => setdesc(e.target.value)} />
+            <textarea style={{width:"75%",border:"none",borderBottom:"1px solid",backgroundColor:"transparent"}} onChange={(e) => setdesc(e.target.value)} />
           </FormItem>
           <FormItem>
             <Titre>Prix :</Titre>
@@ -194,19 +204,19 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Nom :</Titre>
-            <Input type="text" />
+            <label>{user.nom}</label>
           </FormItem>
           <FormItem>
             <Titre>Prénom :</Titre>
-            <Input type="text" />
+            <label>{user.prenom}</label>
           </FormItem>
           <FormItem>
             <Titre>E_mail :</Titre>
-            <Input type="email" />
+            <label>{user.email}</label>
           </FormItem>
           <FormItem>
             <Titre>Téléphone :</Titre>
-            <Input type="tle" onChange={(e) => setnum_tlp(e.target.value)} />
+            <Input type="tle" value={num_tlp} onChange={(e) => setnum_tlp(e.target.value)} />
           </FormItem>
           <FormItem>
             <Button onClick={addAnnonce}>Enregistrer</Button>

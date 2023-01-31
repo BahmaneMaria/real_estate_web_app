@@ -8,7 +8,7 @@ function Ajout() {
   useEffect(() => {
     APIService.GetWilayas().then(resp=>setwilayas(resp)).catch(error=>console.log(error));
     APIService.GetTypeBienImmobilier().then(resp=>settype_bien(resp)).catch(error=>console.log(error));
-    APIService.GetCategorie().then(resp=>setcategories(resp)).catch(error=>console.log(error));
+    APIService.GetCategories().then(resp=>setcategories(resp)).catch(error=>console.log(error));
   }, [])
   return (
     <div style={{ backgroundColor: "#f7f7f7" }}>

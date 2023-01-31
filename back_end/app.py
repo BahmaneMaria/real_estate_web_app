@@ -1,5 +1,6 @@
 from flask import Flask,jsonify,request,send_file
 from flask_sqlalchemy import SQLAlchemy
+from datetime import date
 import datetime
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
@@ -60,13 +61,16 @@ class CommunesSchema(ma.Schema):
 commune_schema=CommunesSchema()
 communes_schema=CommunesSchema(many=True)
 
-@app.route('/getcommune/<id>',methods=['GET'])
+@app.route('/getcommunes/<id>',methods=['GET'])
 def get_communes(id):
-    communes=Communes.query.filter_by(wilaya_id=id)
+    communes=Communes.query.filter_by(wilaya_id=id).order_by(Communes.nom.asc()) # asc
     results=communes_schema.dump(communes)
     return jsonify(results)
 
-
+@app.route('/getcommune/<id>',methods=['GET'])
+def get_commune(id):
+    commune=Communes.query.get(id)
+    return commune_schema.jsonify(commune)
 
 #classe catégorie:
 class Categorie(db.Model):
@@ -83,12 +87,16 @@ class CategorieSchema(ma.Schema):
 categorie_schema=CategorieSchema()
 categories_schema=CategorieSchema(many=True)
 
-@app.route('/getcategorie',methods=['GET'])
-def get_categorie():
+@app.route('/getcategories',methods=['GET'])
+def get_categories():
     all_categories=Categorie.query.all()
     results=categories_schema.dump(all_categories)
     return jsonify(results)
 
+@app.route('/getcategorie/<id>',methods=['GET'])
+def get_categorie(id):
+    categorie=Categorie.query.get(id)
+    return categorie_schema.jsonify(categorie)
     
 #classe type bien immobilier
 class Type_bien_immobilier(db.Model):
@@ -106,11 +114,15 @@ Type_bien_immobilier_schema=WilayasSchema()
 Types_bien_immobilier_schema=WilayasSchema(many=True)
 
 @app.route('/get_Types_bien_immobilier',methods=['GET'])
-def get_type_bien_immobilier():
+def get_types_bien_immobilier():
     all_types=Type_bien_immobilier.query.all()
     results=Types_bien_immobilier_schema.dump(all_types)
     return jsonify(results)
 
+@app.route('/get_Type_bien_immobilier/<id>',methods=['GET'])
+def get_type_bien_immobilier(id):
+    type=Type_bien_immobilier.query.get(id)
+    return Type_bien_immobilier_schema.jsonify(type)
 
 #class Annonce:
 class Annonce(db.Model):
@@ -122,7 +134,7 @@ class Annonce(db.Model):
     id_commune=db.Column(db.Integer())
     address=db.Column(db.String(255))
     description=db.Column(db.Text())
-    date_creation=db.Column(db.DateTime(),default=datetime.datetime.now)
+    date_creation=db.Column(db.Date(),default=date.today())
     heure_creation=db.Column(db.DateTime(),default=datetime.datetime.now)
     id_utilisateur=db.Column(db.Integer())
     num_tlp=db.Column(db.String(10))
@@ -139,7 +151,7 @@ class Annonce(db.Model):
 
 class AnnonceSchema(ma.Schema):
     class Meta:
-        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','photos')
+        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp')
 
 annonce_schema=AnnonceSchema()
 annonces_schema=AnnonceSchema(many=True)
@@ -152,10 +164,11 @@ def get_Annonces():
     return jsonify(results)
 
 
-@app.route('/get_annonce/<id>/',methods=['GET'])
-def post_details(id):
-    annonce=Annonce.query.get(id)
-    return annonce_schema.jsonify(annonce)
+@app.route('/get_annonce/<id>',methods=['GET'])
+def get_annonce(id):
+    annonces=Annonce.query.filter_by(id_utilisateur=id)
+    results=annonces_schema.dump(annonces)
+    return jsonify(results)
 
 
 @app.route('/add',methods=['POST'])
@@ -167,21 +180,22 @@ def add_Annonces():
     id_commune=Communes.query.filter_by(nom=request.json['commune']).first().id
     address=request.json['address']
     description=request.json['description']
-    id_utilisateur=1
+    id_utilisateur=request.json['id_user']
     num_tlp=request.json['num_tlp']
     annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp)
     db.session.add(annonce)
     db.session.commit()
     return annonce_schema.jsonify(annonce)
 
-
-@app.route('/delete/<id>',methods=['DELETE'])
+    
+@app.route('/delete_annonce/<id>/',methods=['DELETE'])
 def delete_Annonce(id):
-    Annonce=Annonce.query.get(id)
-    db.session.delete(Annonce)
+    annonce=Annonce.query.get(id)
+    db.session.delete(annonce)
     db.session.commit()
-    return annonce_schema.jsonify(Annonce)
+    return annonce_schema.jsonify(annonce)
 
+#class images:
 class Images(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     data = db.Column(db.LargeBinary(),nullable=False)
@@ -212,8 +226,39 @@ def upload(id):
 @app.route('/getimage/<id>',methods=['GET'])
 def get_img(id):
     img = Images.query.filter_by(id_annonce=id).first()
+    if not img:
+        img = Images.query.get(0)
+        return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
+
     return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
 
+@app.route('/delete_image/<id>/',methods=['DELETE'])
+def delete_Images(id):
+    img=Images.query.filter_by(id_annonce=id).first()
+    db.session.delete(img)
+    db.session.commit()
+    return 'Done',200
+
+#class utilisateur
+class Utilisateurs(db.Model):
+    id_User = db.Column(db.Integer(), primary_key=True)
+    Nom = db.Column(db.String(40),nullable=False)
+    Prenom = db.Column(db.String(40), nullable=False)
+    Email = db.Column(db.String(50), nullable=False)
+    Adresse = db.Column(db.Integer())
+    telephone = db.Column(db.String(10))
+
+class UtilisateurSchema(ma.Schema):
+    class Meta:
+        fields=('id_User','Nom','Prenom','Email','Adresse','telephone')
+
+utilisateur_schema=UtilisateurSchema()
+utilisateurs_schema=UtilisateurSchema(many=True)
+
+@app.route('/get_utilidateur/<id>',methods=['GET'])
+def get_utilisateur(id):
+    user=Utilisateurs.query.get(id)
+    return utilisateur_schema.jsonify(user)
 
 if __name__ == "__main__":
      app.run(debug=True)
