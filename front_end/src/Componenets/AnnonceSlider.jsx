@@ -21,7 +21,7 @@ export default function AnnonceSlider() {
     tlp:'',
   });
   useEffect(() => {
-    APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);alert(resp.id_User);APIService.GetAnnonce(resp.id_User).then(res => setannonces(res)).catch(Error => console.log(Error));});
+    APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);APIService.GetAnnonce(resp.id_User).then(res => setannonces(res)).catch(Error => console.log(Error));});
   },[])
   const deleteAnnonce=(annonce)=>{
     const new_annonces=annonces.filter((my_annonce)=>{
