@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import APIService from "./APIService";
+import { Audio } from 'react-loader-spinner'
 const Container = styled.div`
   background-color: transparent;
   border: 1px solid;
@@ -51,7 +52,7 @@ const Input = styled.input`
   background-color: transparent;
   width: 75%;
 `;
-const Icon = styled.div``;
+
 const Image = styled.img`
   height: 100%;
   width: 100%;
@@ -78,21 +79,22 @@ const NouvelleAnnonce = (props) => {
   const [prix, setprix] = useState();
   const [surface, setsurface] = useState();
   const [id, setid] = useState(1);
-  const [user,setuser]=useState({
+  const [user, setuser] = useState({
     id,
-    nom:'',
-    prenom:'',
-    email:'',
-    tlp:'',
+    nom: '',
+    prenom: '',
+    email: '',
+    tlp: '',
   });
-  let nav=useNavigate();
+  const [nb_images,set_nb_images]=useState(0);
+  let nav = useNavigate();
   useEffect(() => {
     APIService.GetCommunes(id).then(resp => setcommunes(resp)).catch(Error => console.log(Error));
-    APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);setnum_tlp(user.tlp);});
-  }, [id,])
+    APIService.GetUtilisateur().then(resp => { const newuser = { id: resp.id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone }; setuser(newuser); setnum_tlp(user.tlp); });
+  }, [id,nb_images])
   const addAnnonce = () => {
-    const id_user=user.id;
-    APIService.AddAnnonce({ address, description,id_user, categorie, commune, type_bien, num_tlp, prix, surface }).then(resp => {
+    const id_user = user.id;
+    APIService.AddAnnonce({ address, description, id_user, categorie, commune, type_bien, num_tlp, prix, surface }).then(resp => {
       if (images.length > 0) {
         images.forEach((image, i) => {
           const data = new FormData();
@@ -100,9 +102,9 @@ const NouvelleAnnonce = (props) => {
           APIService.AddImage(data, resp.id);
         });
       };
-        nav('/profile');
-    }).catch(Error => alert("Erreur: Veuillez remplire ce qui monque"));;
-   
+      nav('/profile');
+    }).catch(Error => alert("Erreur: Veuillez remplire ce qui manque"));;
+
   }
 
   return (
@@ -119,13 +121,21 @@ const NouvelleAnnonce = (props) => {
             style={{ display: "none" }}
             onChange={(event) => {
               images.push(event.target.files[0])
-              alert(`chargement de ${images.length} images`)
+              set_nb_images(images.length);
             }}
           />
           <Button>
             <label htmlFor="imgInput">Importer</label>
           </Button>
-          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px"}}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : null}
+          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px" }}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : <Audio
+            height="80"
+            width="80"
+            radius="9"
+            color="green"
+            ariaLabel="loading"
+            wrapperStyle
+            wrapperClass
+          />}
         </CoteImage>
         <Form>
           <FormItem>
@@ -183,13 +193,13 @@ const NouvelleAnnonce = (props) => {
             <Titre>Addresse :</Titre>
             <Input type="text" onChange={(e) => setaddress(e.target.value)} />
           </FormItem>
-         {commune ? <iframe width="600" height="468" id="gmap_canvas" src={`https://maps.google.com/maps?q=${commune}&t=&z=13&ie=UTF8&iwloc=&output=embed`} frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>:null}
+          {commune ? <iframe width="600" height="468" id="gmap_canvas" src={`https://maps.google.com/maps?q=${commune}&t=&z=13&ie=UTF8&iwloc=&output=embed`} frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe> : null}
           <FormItem>
             <Button>Positionner sur le map</Button>
           </FormItem>
           <FormItem>
             <Titre>Description :</Titre>
-            <textarea style={{width:"75%",border:"none",borderBottom:"1px solid",backgroundColor:"transparent"}} onChange={(e) => setdesc(e.target.value)} />
+            <textarea style={{ width: "75%", border: "none", borderBottom: "1px solid", backgroundColor: "transparent" }} onChange={(e) => setdesc(e.target.value)} />
           </FormItem>
           <FormItem>
             <Titre>Prix :</Titre>
