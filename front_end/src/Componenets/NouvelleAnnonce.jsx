@@ -126,7 +126,7 @@ const NouvelleAnnonce = (props) => {
           <Button>
             <label htmlFor="imgInput">Importer</label>
           </Button>
-          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px" }}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : }|
+          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px" }}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : null}
         </CoteImage>
         <Form>
           <FormItem>
