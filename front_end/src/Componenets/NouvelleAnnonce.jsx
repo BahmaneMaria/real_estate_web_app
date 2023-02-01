@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import APIService from "./APIService";
-import { Audio } from 'react-loader-spinner'
 const Container = styled.div`
   background-color: transparent;
   border: 1px solid;
@@ -127,15 +126,7 @@ const NouvelleAnnonce = (props) => {
           <Button>
             <label htmlFor="imgInput">Importer</label>
           </Button>
-          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px" }}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : <Audio
-            height="80"
-            width="80"
-            radius="9"
-            color="green"
-            ariaLabel="loading"
-            wrapperStyle
-            wrapperClass
-          />}
+          {images.length > 0 ? <div style={{ display: "flex", width: "100%", height: "75%", overflow: "auto", margin: "10px" }}>{images && images.map((image) => { return <Image src={URL.createObjectURL(image)} /> })}</div> : }|
         </CoteImage>
         <Form>
           <FormItem>
