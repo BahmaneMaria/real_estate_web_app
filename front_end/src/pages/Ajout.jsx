@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import APIService from "../Componenets/APIService";
-import NouvelleAnnonce from "../Componenets/NouvelleAnnonce"
+import NouvelleAnnonce from "../Componenets/NouvelleAnnonce";
+import Navbar from "../Componenets/Navbar";
 function Ajout() {
   const [wilayas, setwilayas] = useState();
   const [Categories,setcategories]=useState();
@@ -11,9 +12,10 @@ function Ajout() {
     APIService.GetCategories().then(resp=>setcategories(resp)).catch(error=>console.log(error));
   }, [])
   return (
-    <div style={{ backgroundColor: "#f7f7f7" }}>
-      <NouvelleAnnonce wilayas={wilayas} type_bien={type_bien} Categories={Categories}/>
-    </div>
+     <><Navbar />
+     <div style={{ backgroundColor: "#f7f7f7" }}>
+      <NouvelleAnnonce wilayas={wilayas} type_bien={type_bien} Categories={Categories} />
+    </div></>
   );
 };
 

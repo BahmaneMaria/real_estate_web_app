@@ -1,11 +1,32 @@
-from flask import Flask,jsonify,request,send_file
+from flask import Flask,jsonify,request,send_file, blueprints
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 import datetime
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
 from io import BytesIO
+#from auth import auth
+#--------------------- Packages for authentification page --------------
+import json
+from flask.wrappers import Response
+from werkzeug.exceptions import abort
+from werkzeug.utils import redirect
+import google 
+from flask_cors import CORS
+from tokenize import generate_tokens
+from urllib import request
+import requests
+from flask import Flask, session, abort, redirect, request
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+from pip._vendor import cachecontrol
+import os,pathlib
+import google.auth.transport.requests
+from flask import Flask, request, json,jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow 
+from sqlalchemy import insert
+#--------------------------------------------------------
 
 
 
@@ -14,9 +35,137 @@ CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:''@localhost/tp_bdd'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+#------------- configurations for auth ---------------------
+app.secret_key = os.urandom(32)
+app.config['SECRET_KEY'] = 'your secret key'
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"]="1"
+
+GOOGLE_CLIENT_ID ="418126861632-1r2dbg7v8h4fu792sfnjmdr0i5r440rb.apps.googleusercontent.com"
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client_secret.json")
+BACKEND_URL="http://127.0.0.1:5000"
+FRONTEND_URL="http://localhost:3000/Profile"
+
+flow = Flow.from_client_secrets_file(
+    client_secrets_file = client_secrets_file,
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
+    redirect_uri = "http://127.0.0.1:5000/callback"
+    )
+
+
+#--------------------end configurations-------------------------
+
+
+
+
+#app.register_blueprint(auth, url_prefix='/')
 
 db=SQLAlchemy(app)
 ma=Marshmallow(app)
+
+#------------Utilisateurs------------
+class table_utilisateurs(db.Model):
+    Id_User=db.Column(db.Integer(),primary_key=True)
+    Nom=db.Column(db.String(40))
+    Prenom=db.Column(db.String(40))
+    Email=db.Column(db.String(50))
+    Adresse=db.Column(db.Integer())
+    telephone=db.Column(db.Integer())
+    Lien_Image =db.Column(db.String(255))
+
+
+    def __init__(self,Nom, Prenom,Email,Adresse,telephone,Lien_Image):
+        self.Nom=Nom
+        self.Prenom=Prenom
+        self.Email=Email
+        self.Adresse=Adresse
+        self.telephone=telephone
+        self.Lien_Image=Lien_Image
+
+       
+
+class table_utilisateursSchema(ma.Schema):
+    class Meta:
+        fields=('Id_User','Nom', 'Prenom','Email','Adresse','telephone','Lien_Image')
+
+table_utilisateurs_schema=table_utilisateursSchema()
+table_utilisateurs_schema=table_utilisateursSchema(many=True)
+#---------------------------------------------
+#--------------- authentification Part -----------------
+#------------------------------------------
+
+def login_is_required(function):
+    def wrapper(*args ,**kwargs):
+        if "google_id" not in session :
+            return abort(401) # ne pas autoriser la connexion
+        else:
+            return function()
+    return wrapper
+
+
+#------------- Login with google account -------------------
+@app.route("/login")
+def login():
+    # create a session 
+   authorization_url, state = flow.authorization_url()
+   session["state"] = state
+   return Response(
+        response=json.dumps({'auth_url':authorization_url}),
+        status=200,
+        mimetype='application/json'
+    )
+
+
+#-------------------------------- Authentification----------------------------------
+@app.route("/callback")
+def callback():
+    flow.fetch_token(authorization_response=request.url)
+
+    
+    credentials = flow.credentials
+    request_session = requests.session()
+    cached_session = cachecontrol.CacheControl(request_session)
+    token_request = google.auth.transport.requests.Request(session=cached_session)
+
+    id_info = id_token.verify_oauth2_token(
+        id_token=credentials._id_token,
+        request=token_request,
+        audience=GOOGLE_CLIENT_ID
+    )
+    session["google_id"] = id_info.get("sub")
+    session["name"] = id_info.get("name")
+    session["email"]=id_info.get('email')
+    session["picture"]=id_info.get('picture')
+
+    # rechercher l'utilisateur dans la bdd
+    exists = db.session.query(db.session.query(table_utilisateurs).filter_by(Email=session['email']).exists()).scalar()
+    # s'il existe on recupere son id 
+    if ( exists):
+        USER= table_utilisateurs.query.filter_by(Email=session["email"]).first()
+        ID_USER=USER.Id_User
+    #sinon on insere l'utilisateur dans la bdd
+    else :
+        user = table_utilisateurs(session["name"],session["name"],session["email"],10,10,session["picture"])
+        db.session.add(user)
+        db.session.commit()
+        USER= table_utilisateurs.query.filter_by(Email=session["email"]).first()
+        ID_USER=USER.Id_User
+    
+    return redirect(f"{FRONTEND_URL}/{ID_USER}")
+    
+    
+# ------------------  logout -----------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return Response(
+        response=json.dumps({"message":"Logged out"}),
+        status=202,
+        mimetype='application/json'
+    )
+
+#--------------------------End Auth Part--------------------------------
+
+#-------------------------- Add Annonce Page + Profile Page ----------------------
 
 #class wilaya:
 class Wilayas(db.Model):
@@ -50,7 +199,7 @@ class Communes(db.Model):
     wilaya_id=db.Column(db.INTEGER())
 
     def __init__(self,code_postal,nom,wilaya_id):
-        self.code=code
+        self.code=code_postal
         self.nom=nom
         self.wilaya_id=wilaya_id
 
@@ -79,7 +228,7 @@ class Categorie(db.Model):
 
     def __init__(self,nom):
         self.nom=nom
-
+ 
 class CategorieSchema(ma.Schema):
     class Meta:
         fields=('id','nom')
