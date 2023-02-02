@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import APIService from "./APIService";
 const Container = styled.div`
@@ -14,6 +14,7 @@ const Container = styled.div`
 const TitreAnnonce = styled.h1`
   top: 0;
   left: 0;
+  font-size: 22px;
 `;
 const AnnonceContainer = styled.div`
   display: flex;
@@ -44,7 +45,8 @@ const FormItem = styled.div`
   margin-bottom: 20px;
   width:100%
 `;
-const Titre = styled.div`margin-right:10px`;
+const Titre = styled.div`margin-right:10px ;
+font-size: 17px;`;
 const Input = styled.input`
   border: none;
   border-bottom: 1px solid;
@@ -64,8 +66,10 @@ const Button = styled.button`
   border: none;
   color: white;
   border-radius: 10px;
+  padding:5px
 `;
 const NouvelleAnnonce = (props) => {
+  const { id } = useParams();
   const [wilaya, setwilaya] = useState();
   const [images, setimages] = useState([]);
   const [communes, setcommunes] = useState();
@@ -77,7 +81,7 @@ const NouvelleAnnonce = (props) => {
   const [num_tlp, setnum_tlp] = useState();
   const [prix, setprix] = useState();
   const [surface, setsurface] = useState();
-  const [id, setid] = useState(1);
+  const [idw, setid] = useState(1);
   const [user, setuser] = useState({
     id,
     nom: '',
@@ -88,9 +92,9 @@ const NouvelleAnnonce = (props) => {
   const [nb_images,set_nb_images]=useState(0);
   let nav = useNavigate();
   useEffect(() => {
-    APIService.GetCommunes(id).then(resp => setcommunes(resp)).catch(Error => console.log(Error));
-    APIService.GetUtilisateur().then(resp => { const newuser = { id: resp.id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone }; setuser(newuser); setnum_tlp(user.tlp); });
-  }, [id,nb_images])
+    APIService.GetCommunes(idw).then(resp => setcommunes(resp)).catch(Error => console.log(Error));
+    APIService.GetUtilisateur(id).then(resp => { const newuser = { id: resp.id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone }; setuser(newuser); setnum_tlp(user.tlp); });
+  }, [idw,nb_images])
   const addAnnonce = () => {
     const id_user = user.id;
     APIService.AddAnnonce({ address, description, id_user, categorie, commune, type_bien, num_tlp, prix, surface }).then(resp => {
@@ -134,7 +138,7 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Catégorie :</Titre>
-            <select value={categorie} onChange={(e) => { setcategorie(e.target.value) }}>
+            <select value={categorie} style={{borderBottom:" 1px solid"}} onChange={(e) => { setcategorie(e.target.value) }}>
               {
                 props.Categories && props.Categories.map((categorie) => {
                   return (
@@ -146,7 +150,7 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Type du bien:</Titre>
-            <select value={type_bien} onChange={(e) => { settype_bien(e.target.value) }}>
+            <select value={type_bien} style={{borderBottom:" 1px solid"}} onChange={(e) => { settype_bien(e.target.value) }}>
               {
                 props.type_bien && props.type_bien.map((type_bien) => {
                   return (
@@ -158,7 +162,7 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Wilaya :</Titre>
-            <select value={wilaya} onChange={(e) => { setwilaya(e.target.value); const s = e.target.value.split(' '); setid(parseInt(s[0])) }}>
+            <select value={wilaya} style={{borderBottom:" 1px solid"}} onChange={(e) => { setwilaya(e.target.value); const s = e.target.value.split(' '); setid(parseInt(s[0])) }}>
               {
                 props.wilayas && props.wilayas.map((wilaya_) => {
                   return (
@@ -170,7 +174,7 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Commune :</Titre>
-            <select value={commune} onChange={(e) => { setCommune(e.target.value) }}>
+            <select value={commune} style={{borderBottom:" 1px solid"}} onChange={(e) => { setCommune(e.target.value) }}>
               {communes ?
                 communes.map((Commune) => {
                   return (
@@ -185,9 +189,6 @@ const NouvelleAnnonce = (props) => {
             <Input type="text" onChange={(e) => setaddress(e.target.value)} />
           </FormItem>
           {commune ? <iframe width="600" height="468" id="gmap_canvas" src={`https://maps.google.com/maps?q=${commune}&t=&z=13&ie=UTF8&iwloc=&output=embed`} frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe> : null}
-          <FormItem>
-            <Button>Positionner sur le map</Button>
-          </FormItem>
           <FormItem>
             <Titre>Description :</Titre>
             <textarea style={{ width: "75%", border: "none", borderBottom: "1px solid", backgroundColor: "transparent" }} onChange={(e) => setdesc(e.target.value)} />

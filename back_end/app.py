@@ -69,7 +69,7 @@ class table_utilisateurs(db.Model):
     Prenom=db.Column(db.String(40))
     Email=db.Column(db.String(50))
     Adresse=db.Column(db.Integer())
-    telephone=db.Column(db.Integer())
+    telephone=db.Column(db.String(10))
     Lien_Image =db.Column(db.String(255))
 
 
@@ -87,7 +87,7 @@ class table_utilisateursSchema(ma.Schema):
     class Meta:
         fields=('Id_User','Nom', 'Prenom','Email','Adresse','telephone','Lien_Image')
 
-table_utilisateurs_schema=table_utilisateursSchema()
+table_utilisateur_schema=table_utilisateursSchema()
 table_utilisateurs_schema=table_utilisateursSchema(many=True)
 #---------------------------------------------
 #--------------- authentification Part -----------------
@@ -388,26 +388,10 @@ def delete_Images(id):
     db.session.commit()
     return 'Done',200
 
-#class utilisateur
-class Utilisateurs(db.Model):
-    id_User = db.Column(db.Integer(), primary_key=True)
-    Nom = db.Column(db.String(40),nullable=False)
-    Prenom = db.Column(db.String(40), nullable=False)
-    Email = db.Column(db.String(50), nullable=False)
-    Adresse = db.Column(db.Integer())
-    telephone = db.Column(db.String(10))
-
-class UtilisateurSchema(ma.Schema):
-    class Meta:
-        fields=('id_User','Nom','Prenom','Email','Adresse','telephone')
-
-utilisateur_schema=UtilisateurSchema()
-utilisateurs_schema=UtilisateurSchema(many=True)
-
 @app.route('/get_utilidateur/<id>',methods=['GET'])
 def get_utilisateur(id):
-    user=Utilisateurs.query.get(id)
-    return utilisateur_schema.jsonify(user)
+    user=table_utilisateurs.query.get(id)
+    return table_utilisateur_schema.jsonify(user)
 
 if __name__ == "__main__":
      app.run(debug=True)

@@ -69,8 +69,8 @@ export default class APIService {
       headers: { 'Content-Type': 'application/json' }
     }).then(resp => resp.json())
   }
-  static GetUtilisateur() {
-    return fetch(`http://127.0.0.1:5000/get_utilidateur/5`, {
+  static GetUtilisateur(id) {
+    return fetch(`http://127.0.0.1:5000/get_utilidateur/${id}`, {
       'method': 'GET',
       headers: { 'Content-Type': 'application/json' }
     }).then(resp => resp.json())

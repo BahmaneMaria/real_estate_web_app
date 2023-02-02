@@ -10,7 +10,6 @@ const Profile = () => {
   return (
     <div style={{ backgroundColor: "#f7f7f7" }}>
       <NavBar/>
-      <div>{id}</div>
       <ProfileInfo />
       <ProfileContenu />
       <AnnonceSlider />

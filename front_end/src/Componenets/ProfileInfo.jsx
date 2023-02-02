@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Avatar from "@mui/material/Avatar";
 import { useEffect } from "react";
 import APIService from "./APIService";
+import { useParams } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -38,6 +39,7 @@ const Button = styled.button`
   margin-right: 10px;
 `;
 export default function ProfileInfo() {
+  const { id } = useParams();
   const [user,setuser]=useState({
     id:0,
     nom:'',
@@ -46,7 +48,7 @@ export default function ProfileInfo() {
     tlp:'',
   });
   useEffect(() => {
-  APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);});},[])
+  APIService.GetUtilisateur(id).then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);});},[])
   return (
     <Container>
       <AvatarContainer>
