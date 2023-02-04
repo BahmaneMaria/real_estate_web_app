@@ -50,9 +50,7 @@ export default function Navbar() {
           <Avatar />
         </MenuItem>
         <MenuItem>
-          <Link to="/Add">
             <AddCircleOutline fontSize="large" />
-          </Link>
         </MenuItem>
         <MenuItem>
           <Link to="/">
