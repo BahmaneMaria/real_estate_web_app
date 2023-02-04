@@ -5,6 +5,8 @@ import datetime
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 from io import BytesIO
+import uuid
+from werkzeug.utils import secure_filename
 #from auth import auth
 #--------------------- Packages for authentification page --------------
 import json
@@ -402,6 +404,112 @@ def update_user(id):
     user.telephone=telephone
     db.session.commit()
     return table_utilisateur_schema.jsonify(user)
+
+
+#---------------------------------------------------------------------------------------------------------
+
+
+def Get_Wilaya(WILAYA_ID):
+    WILAYA=Wilayas.query.filter_by(id=WILAYA_ID).first()
+    return (WILAYA.nom)
+
+
+def Get_Commune_Wilaya(COMMUNE_ID):
+    COMMUNE=Communes.query.filter_by(id=COMMUNE_ID).first()
+    return COMMUNE.nom, Get_Wilaya(COMMUNE.wilaya_id)
+
+
+
+def Get_Type(TYPE_ID):
+    TYPE=Type_bien_immobilier.query.filter_by(id=TYPE_ID).first()
+    return (TYPE.nom)
+
+def Get_Categorie(CATEGORIE_ID):
+    CATEGORIE=Categorie.query.filter_by(id=CATEGORIE_ID).first()
+    return (CATEGORIE.nom)
+
+
+def Get_User(USER_ID):
+    USER= table_utilisateurs.query.filter_by(Id_User=USER_ID).first()
+    return USER.Nom, USER.Prenom,USER.Email,USER.Adresse,USER.telephone
+
+#----------------- Fin BDD --------------
+
+
+#-----------Formaliser l'annonce en JSON---------------
+def Get_full_Annonce(ANNONCE_ID):
+    ANNONCE=Annonce.query.filter_by(id=ANNONCE_ID).first()
+    TYPE=Get_Type(ANNONCE. id_type_bien_immobilier)
+    CATEGORIE =Get_Categorie(ANNONCE.id_categorie)
+    COMMUNE,WILAYA =Get_Commune_Wilaya(ANNONCE.id_commune)
+    Nom, Prenom,Email,Adresse,telephone= Get_User(ANNONCE.id_utilisateur)
+    COMMUNE_annonceur,WILAYA_annonceur =Get_Commune_Wilaya(Adresse)
+    pic_filename= secure_filename('wp.jpg')
+    pic_name = str(uuid.uuid1())+"_"+pic_filename
+    file = 'wp.jpg'
+    return {
+        'ID': ANNONCE_ID,
+        'TYPE': TYPE,
+        'CATEGORIE' : CATEGORIE,
+        'COMMUNE': COMMUNE,
+        'WILAYA' : WILAYA,
+        'DATE' : str(ANNONCE.date_creation),
+        'Instant_Annonce' : str(ANNONCE.heure_creation),
+        'PRIX': ANNONCE.prix,
+        'SURFACE': ANNONCE.surface,
+        'DESCRIPTION': ANNONCE.description,
+        'Nom':Nom,
+        'Prenom': Prenom,
+        'Email': Email,
+        'Adresse': Adresse,
+        'telephone':telephone,
+        'WILAYA_annonceur':WILAYA_annonceur,
+        'COMMUNE_annonceur':COMMUNE_annonceur,
+        'Adresse':ANNONCE.address,
+        'pic_name' :file
+
+    }
+#------------Table Images -----------
+class imagestable(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    nom = db.Column(db.String(50), nullable=False)   
+    id_annonce = db.Column(db.Integer())
+
+class imagestableSchema(ma.Schema):
+    class Meta:
+        fields=('id','nom','id_annonce')
+
+imagestable_schema=imagestableSchema()
+imagestable_schema=imagestableSchema(many=True)
+
+
+
+
+
+
+# send request from the frontend 
+@app.route('/get_id', methods = ['POST','GET'] )
+def Get_id():
+    
+    request_data = json.loads(request.data)
+    id= request_data['Annonce_ID']
+    return (Get_full_Annonce(id))
+
+
+@app.route('/Send')
+def send():
+   Commune,wilaya=Get_Commune_Wilaya(2)
+   return wilaya
+
+@app.route('/Get_Images', methods = ['POST','GET'])
+def IMG():
+    request_data = json.loads(request.data)
+    id_Annonce= request_data['Annonce_ID']
+    print(id_Annonce)
+    imgs = imagestable.query.filter_by(id_annonce=int(id_Annonce))
+    results=images_schema.dump(imgs)
+    return jsonify(results)
+
 
 if __name__ == "__main__":
      app.run(debug=True)

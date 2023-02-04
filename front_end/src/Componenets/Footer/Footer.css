@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap");
+.Containerfooter {
+  font-family: "Poppins";
+  background: rgb(37, 37, 37);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  height: 330px;
+  align-items: center;
+}
+.rowfooter {
+  text-align: center;
+}
+.titlefooter {
+  color: white;
+}

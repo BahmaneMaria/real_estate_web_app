@@ -1,0 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap");
+.buttocontainer {
+  font-family: "Poppins";
+  height: 70px;
+  width: 100%;
+  margin: 30px;
+  align-content: center;
+}
+
+.envoimsgbtn {
+  font-family: "Poppins";
+  margin-top: 40px;
+  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  color: rgb(247, 247, 247);
+  padding: 7px;
+  border: none;
+  outline: none;
+  border-radius: 15px;
+  color: white;
+  position: absolute;
+  right: 4%;
+  background-color: rgb(51, 70, 211);
+}
+.iconcontainer {
+  font-family: "Poppins";
+  height: 80%;
+  width: 80%;
+  align-items: center;
+}
+.message {
+  font-family: "Poppins";
+  align-self: center;
+}
