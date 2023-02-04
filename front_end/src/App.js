@@ -10,8 +10,6 @@ function App() {
     <Router>
       <div style={{ backgroundColor: "#f7f7f7" }}>
         <Routes>
-          
-          <Route path="/Add" element={<Ajout />}></Route>
           <Route path="/Add/:id" element={<Ajout />}></Route>
           <Route path="/" element={<PageAuth />}></Route>
           <Route path="/Profile/:id" element={<Profile />}></Route>
