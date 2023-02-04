@@ -1,0 +1,6 @@
+export {default as Annonces} from './annonces/Annonces'
+export {default as Footer} from './footer/Footer'
+export {default as Header} from './header/Header'
+export {default as Navbar} from './navbar/Navbar'
+export {default as Filter} from './filter/Filter'
+export {default as Categories} from './categories/Categories'

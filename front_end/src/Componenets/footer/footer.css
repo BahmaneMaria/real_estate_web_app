@@ -1,0 +1,12 @@
+.footer-container{
+    padding: 3rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background: #252525;
+    color: var(--color-white);
+}
+.footer-info li{
+    font-weight: 300;
+    font-size: 13px;
+}
