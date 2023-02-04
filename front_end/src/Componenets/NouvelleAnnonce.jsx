@@ -93,7 +93,7 @@ const NouvelleAnnonce = (props) => {
   let nav = useNavigate();
   useEffect(() => {
     APIService.GetCommunes(idw).then(resp => setcommunes(resp)).catch(Error => console.log(Error));
-    APIService.GetUtilisateur(id).then(resp => { const newuser = { id: resp.id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone }; setuser(newuser); setnum_tlp(user.tlp); });
+    APIService.GetUtilisateur(id).then(resp => { const newuser = { id: resp.Id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone }; setuser(newuser); setnum_tlp(user.tlp); });
   }, [idw,nb_images])
   const addAnnonce = () => {
     const id_user = user.id;
@@ -105,7 +105,7 @@ const NouvelleAnnonce = (props) => {
           APIService.AddImage(data, resp.id);
         });
       };
-      nav('/profile');
+      nav(`/profile/${user.id}`);
     }).catch(Error => alert("Erreur: Veuillez remplire ce qui manque"));;
 
   }

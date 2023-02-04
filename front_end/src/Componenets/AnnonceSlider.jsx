@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import APIService from "./APIService";
 import Annonce from "./Annonce";
+import { useParams } from "react-router-dom";
 const Container = styled.div`
 margin-top: 3rem;
     display: flex;
@@ -12,6 +13,7 @@ margin-top: 3rem;
     margin:10px;
 `;
 export default function AnnonceSlider() {
+  const { id } = useParams();
   const [annonces, setannonces] = useState();
   const [user,setuser]=useState({
     id:0,
@@ -21,7 +23,7 @@ export default function AnnonceSlider() {
     tlp:'',
   });
   useEffect(() => {
-    APIService.GetUtilisateur().then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);APIService.GetAnnonce(resp.id_User).then(res => setannonces(res)).catch(Error => console.log(Error));});
+    APIService.GetUtilisateur(id).then(resp=>{const newuser={id:resp.Id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);APIService.GetAnnonce(resp.Id_User).then(res => setannonces(res)).catch(Error => console.log(Error));});
   },[])
   const deleteAnnonce=(annonce)=>{
     const new_annonces=annonces.filter((my_annonce)=>{
