@@ -209,10 +209,6 @@ const NouvelleAnnonce = (props) => {
             <label>{user.nom}</label>
           </FormItem>
           <FormItem>
-            <Titre>Prénom :</Titre>
-            <label>{user.prenom}</label>
-          </FormItem>
-          <FormItem>
             <Titre>E_mail :</Titre>
             <label>{user.email}</label>
           </FormItem>

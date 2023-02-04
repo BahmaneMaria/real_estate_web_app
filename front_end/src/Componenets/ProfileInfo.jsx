@@ -27,52 +27,94 @@ const InfoItem = styled.div`
   align-items: center;
   margin:10px
 `;
-const Button = styled.button`
-  color: white;
-  background-color: #3346d3;
+const Input = styled.input`
   border: none;
-  border-radius: 14px;
-  text-align: center;
-  font-size: 20px;
-  cursor: pointer;
-  margin-left: 10px;
-  margin-right: 10px;
+  border-bottom: 1px solid;
+  background-color: transparent;
+  width: 75%;
 `;
 export default function ProfileInfo() {
   const { id } = useParams();
-  const [user,setuser]=useState({
-    id:0,
-    nom:'',
-    prenom:'',
-    email:'',
-    tlp:'',
+  const [num_tlp,setnum_tlp]=useState('');
+  const [address,setaddress]=useState('');
+  const [user, setuser] = useState({
+    id: 0,
+    nom: '',
+    prenom: '',
+    email: '',
+    tlp: '',
+    img: '',
+    adr: '',
   });
+  const [state, setstate] = useState(false);
   useEffect(() => {
-  APIService.GetUtilisateur(id).then(resp=>{const newuser={id:resp.id_User,nom:resp.Nom,prenom:resp.Prenom,email:resp.Email,tlp:resp.telephone};setuser(newuser);});},[])
+    APIService.GetUtilisateur(id).then(resp => { const newuser = { id: resp.id_User, nom: resp.Nom, prenom: resp.Prenom, email: resp.Email, tlp: resp.telephone, img: resp.Lien_Image, adr: resp.Adresse }; setuser(newuser); });
+  }, [id, state])
+  const clickHandel = () => {
+    setstate(true);
+  }
+  const update = () => { APIService.UpdateUser(id,{address,num_tlp}).catch(Error=>console.log(Error));
+    setstate(false) }
   return (
     <Container>
       <AvatarContainer>
         <Avatar
           sx={{ width: 120, height: 120 }}
-          src="https://ichef.bbci.co.uk/news/976/cpsprodpb/F382/production/_123883326_852a3a31-69d7-4849-81c7-8087bf630251.jpg"
+          src={user.img}
         />
       </AvatarContainer>
       <InfoContainer>
         <InfoItem>
-          {user.nom} {user.prenom}
+          {user.nom}
+          <button style={{
+            marginLeft: "40px", cursor: "pointer",
+            backgroundColor: "#3346d3",
+            border: "none",
+            color: "white",
+            borderRadius: "10px",
+            padding: "2px",
+            fontSize: "17px"
+          }} onClick={clickHandel}>Modifier</button>
         </InfoItem>
         <InfoItem>
-          <label style={{marginRight:"10px"}}>Nom: </label>
+          <label style={{ marginRight: "10px" }}>Nom: </label>
           <label>{user.nom}</label>
         </InfoItem>
         <InfoItem>
-          Prenom: 
-          <label>{user.prenom}</label>
+          <label style={{ marginRight: "10px" }}>Adresse: </label>
+          <label >{user.adr}</label>
         </InfoItem>
         <InfoItem>
-          Email: 
+          <label style={{ marginRight: "10px" }}>Téléphone: </label>
+          <label>{user.tlp}</label>
+        </InfoItem>
+        <InfoItem>
+          <label style={{ marginRight: "10px" }}>Email:</label>
           <label>{user.email}</label>
         </InfoItem>
+        {state ?
+          <InfoContainer>
+            <InfoItem>
+            <label style={{ marginRight: "10px" }}>Adresse: </label>
+            <Input type="text" onChange={(e) => setaddress(e.target.value)} />
+            </InfoItem>
+            <InfoItem>
+               <label style={{ marginRight: "10px" }}>Téléphone: </label>
+              <Input type="tle"  onChange={(e) => setnum_tlp(e.target.value)} /></InfoItem>
+            <InfoItem>
+              <button style={{
+              marginLeft: "40px", cursor: "pointer",
+              backgroundColor: "#3346d3",
+              border: "none",
+              color: "white",
+              borderRadius: "10px",
+              padding: "2px",
+              fontSize: "17px"
+            }} onClick={update}>Enregistrer</button></InfoItem>
+          </InfoContainer> : null
+        }
+
+
       </InfoContainer>
     </Container>
   );

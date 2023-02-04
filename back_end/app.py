@@ -68,7 +68,7 @@ class table_utilisateurs(db.Model):
     Nom=db.Column(db.String(40))
     Prenom=db.Column(db.String(40))
     Email=db.Column(db.String(50))
-    Adresse=db.Column(db.Integer())
+    Adresse=db.Column(db.String(255))
     telephone=db.Column(db.String(10))
     Lien_Image =db.Column(db.String(255))
 
@@ -144,7 +144,7 @@ def callback():
         ID_USER=USER.Id_User
     #sinon on insere l'utilisateur dans la bdd
     else :
-        user = table_utilisateurs(session["name"],session["name"],session["email"],10,10,session["picture"])
+        user = table_utilisateurs(session["name"],session["name"],session["email"],'','',session["picture"])
         db.session.add(user)
         db.session.commit()
         USER= table_utilisateurs.query.filter_by(Email=session["email"]).first()
@@ -391,6 +391,16 @@ def delete_Images(id):
 @app.route('/get_utilidateur/<id>',methods=['GET'])
 def get_utilisateur(id):
     user=table_utilisateurs.query.get(id)
+    return table_utilisateur_schema.jsonify(user)
+
+@app.route('/update_user/<id>',methods=['PUT'])
+def update_user(id):
+    user=table_utilisateurs.query.get(id)
+    Adresse=request.json['address']
+    telephone=request.json['num_tlp']
+    user.Adresse=Adresse
+    user.telephone=telephone
+    db.session.commit()
     return table_utilisateur_schema.jsonify(user)
 
 if __name__ == "__main__":
