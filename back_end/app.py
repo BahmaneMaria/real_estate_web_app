@@ -32,6 +32,9 @@ from sqlalchemy import insert
 from nlp import mot_cles , context , extract_filter
 import numpy as np
 
+#pip install spacy
+#python -m spacy download fr_core_news_md
+
 
 app = Flask(__name__)
 CORS(app)
