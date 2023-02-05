@@ -41,6 +41,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.secret_key = os.urandom(32)
 app.config['SECRET_KEY'] = 'your secret key'
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"]="1"
+# Initalize The Database
+UPLOAD_FOLDER = "frontend/src/static/images/"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 GOOGLE_CLIENT_ID ="418126861632-1r2dbg7v8h4fu792sfnjmdr0i5r440rb.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client_secret.json")
@@ -280,6 +283,7 @@ class Annonce(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     id_categorie=db.Column(db.Integer())
     id_type_bien_immobilier=db.Column(db.Integer())
+    id_wilaya=db.Column(db.Integer())
     surface=db.Column(db.Float())
     prix=db.Column(db.Float())
     id_wilaya =db.Column(db.Integer())
@@ -299,6 +303,7 @@ class Annonce(db.Model):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
         self.surface=surface
+        self.id_wilaya = id_wilaya
         self.prix=prix
         self.id_wilaya = id_wilaya
         self.id_commune=id_commune
@@ -312,7 +317,7 @@ class Annonce(db.Model):
 
 class AnnonceSchema(ma.Schema):
     class Meta:
-        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','multi_pics','annonce_pic','key_words')
+        fields=('id','id_categorie','id_wilaya','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','multi_pics','annonce_pic','key_words')
 
 annonce_schema=AnnonceSchema()
 annonces_schema=AnnonceSchema(many=True)
