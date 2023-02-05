@@ -386,49 +386,6 @@ def delete_Annonce(id):
     db.session.commit()
     return annonce_schema.jsonify(annonce)
 
-#class images:
-class Images(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    data = db.Column(db.LargeBinary(),nullable=False)
-    nom = db.Column(db.String(50), nullable=False)
-    mimetype = db.Column(db.Text(), nullable=False)
-    id_annonce = db.Column(db.Integer())
-
-class ImagesSchema(ma.Schema):
-    class Meta:
-        fields=('id','data','nom','mimtype','id_annonce')
-
-image_schema=ImagesSchema()
-images_schema=ImagesSchema(many=True)
-
-@app.route('/upload/<id>', methods=['POST'])
-def upload(id):
-    pic = request.files['pic']
-    if not pic:
-        return 'No pic uploaded!', 400
-    
-    img = Images(data=pic.read(), nom=pic.filename, mimetype=pic.mimetype,id_annonce=id)
-    db.session.add(img)
-    db.session.commit()
-
-    return 'Img Uploaded!', 200
-
-
-@app.route('/getimage/<id>',methods=['GET'])
-def get_img(id):
-    img = Images.query.filter_by(id_annonce=id).first()
-    if not img:
-        img = Images.query.get(0)
-        return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
-
-    return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
-
-@app.route('/delete_image/<id>/',methods=['DELETE'])
-def delete_Images(id):
-    img=Images.query.filter_by(id_annonce=id).first()
-    db.session.delete(img)
-    db.session.commit()
-    return 'Done',200
 
 @app.route('/get_utilidateur/<id>',methods=['GET'])
 def get_utilisateur(id):
