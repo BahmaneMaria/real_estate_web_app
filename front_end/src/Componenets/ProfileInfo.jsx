@@ -53,8 +53,8 @@ export default function ProfileInfo() {
   const clickHandel = () => {
     setstate(true);
   }
-  const update = () => { APIService.UpdateUser(id,{address,num_tlp}).catch(Error=>console.log(Error));
-    setstate(false) }
+  const update = () => { setstate(false);APIService.UpdateUser(id,{address,num_tlp}).catch(Error=>console.log(Error));
+     }
   return (
     <Container>
       <AvatarContainer>

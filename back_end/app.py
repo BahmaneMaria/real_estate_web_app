@@ -289,6 +289,11 @@ class Annonce(db.Model):
     heure_creation=db.Column(db.DateTime(),default=datetime.datetime.now)
     id_utilisateur=db.Column(db.Integer())
     num_tlp=db.Column(db.String(10))
+    #image
+    multi_pics = db.Column(db.Boolean())
+    annonce_pic = db.Column(db.Text())
+    # tags and keywords (for research)
+    key_words = db.Column(db.Text())
     def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_commune,address,description,id_utilisateur,num_tlp):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
@@ -299,30 +304,52 @@ class Annonce(db.Model):
         self.description=description
         self.id_utilisateur=id_utilisateur
         self.num_tlp=num_tlp
+        self.multi_pics = multi_pics
+        self.annonce_pic = annonce_pic
+        self.key_words = key_words
 
 class AnnonceSchema(ma.Schema):
     class Meta:
-        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp')
+        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','multi_pics','annonce_pic','key_words')
 
 annonce_schema=AnnonceSchema()
 annonces_schema=AnnonceSchema(many=True)
 
-
-@app.route('/get_annonce',methods=['GET'])
+#get toutes les annonces
+@app.route('/get_annonces',methods=['GET'])
 def get_Annonces():
     all_Annonces=Annonce.query.all()
     results=annonces_schema.dump(all_Annonces)
     return jsonify(results)
 
-
-@app.route('/get_annonce/<id>',methods=['GET'])
+#get annonce par utilisateur
+@app.route('/get_annonce_user/<id>',methods=['GET'])
 def get_annonce(id):
     annonces=Annonce.query.filter_by(id_utilisateur=id)
     results=annonces_schema.dump(annonces)
     return jsonify(results)
 
+#get une annonce selon le id
+@app.route('/get_annonce/<id>/',methods=['GET'])
+def post_details(id):
+    annonce=Annonce.query.get(id)
+    return annonce_schema.jsonify(annonce)
 
-@app.route('/add',methods=['POST'])
+
+#get les annonces d'une categorie
+@app.route('/get_annonce/categorie/<categorie>',methods=['GET'])
+def get_annonces_categorie(categorie):
+    #premierment trouver le id de la categorie correspandante 
+    #puis trouver les annonces qui on cette id
+    id_categorie = Categorie.query.filter(Categorie.nom == str(categorie))
+    all_Annonces=Annonce.query.filter(Annonce.id_categorie == id_categorie).all()
+    #all_Annonces=Annonce.query.filter(Annonce.description == str("categorie")).all()
+    results=annonces_schema.dump(all_Annonces)
+    return jsonify(results)
+
+
+#ajout annonce
+@app.route('/add_annonce',methods=['POST'])
 def add_Annonces():
     id_categorie=Categorie.query.filter_by(nom=request.json['categorie']).first().id
     id_type_bien_immobilier=Type_bien_immobilier.query.filter_by(nom=request.json['type_bien']).first().id

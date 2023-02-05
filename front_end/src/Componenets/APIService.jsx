@@ -24,19 +24,19 @@ export default class APIService {
     }).then(resp => resp.json())
   }
   static GetAllAnnonce() {
-    return fetch('http://127.0.0.1:5000/get_annonce', {
+    return fetch('http://127.0.0.1:5000/get_annonces', {
       'method': 'GET',
       headers: { 'Content-Type': 'applications/json' }
     }).then(resp => resp.json())
   }
   static GetAnnonce(id) {
-    return fetch(`http://127.0.0.1:5000/get_annonce/${id}`, {
+    return fetch(`http://127.0.0.1:5000/get_annonce_user/${id}`, {
       'method': 'GET',
       headers: { 'Content-Type': 'applications/json' }
     }).then(resp => resp.json())
   }
   static AddAnnonce(body) {
-    return fetch('http://127.0.0.1:5000/add', {
+    return fetch('http://127.0.0.1:5000/add_annonce', {
       'method': 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)

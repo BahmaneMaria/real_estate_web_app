@@ -9,7 +9,7 @@ function Footer() {
     <ul className='flex gap-10 pb-40 pt-10  text-[#ffffff] text-1xl font-regular'>
         <li style={divStyles} ><b>LOGO</b></li>
         <li >Contactez-nous</li>
-        <li >comment ca fonctionne</li>
+        <li >comment ça fonctionne</li>
         <li >A propre de nous</li>
     </ul>
 </div>
