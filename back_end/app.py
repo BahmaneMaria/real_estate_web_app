@@ -282,6 +282,7 @@ class Annonce(db.Model):
     id_type_bien_immobilier=db.Column(db.Integer())
     surface=db.Column(db.Float())
     prix=db.Column(db.Float())
+    id_wilaya =db.Column(db.Integer())
     id_commune=db.Column(db.Integer())
     address=db.Column(db.String(255))
     description=db.Column(db.Text())
@@ -294,11 +295,12 @@ class Annonce(db.Model):
     annonce_pic = db.Column(db.Text())
     # tags and keywords (for research)
     key_words = db.Column(db.Text())
-    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_commune,address,description,id_utilisateur,num_tlp):
+    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_wilaya,id_commune,address,description,id_utilisateur,num_tlp, multi_pics, annonce_pic , key_words):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
         self.surface=surface
         self.prix=prix
+        self.id_wilaya = id_wilaya
         self.id_commune=id_commune
         self.address=address
         self.description=description
