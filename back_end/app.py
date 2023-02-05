@@ -618,5 +618,6 @@ def add_annonce2():
     return "l'annonce a été ajouté avec succes"
 
 
+
 if __name__ == "__main__":
      app.run(debug=True)
