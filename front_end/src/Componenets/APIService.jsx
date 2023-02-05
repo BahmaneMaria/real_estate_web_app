@@ -24,26 +24,32 @@ export default class APIService {
     }).then(resp => resp.json())
   }
   static GetAllAnnonce() {
-    return fetch('http://127.0.0.1:5000/get_annonces', {
+    return fetch('http://127.0.0.1:5000/get_annonce', {
       'method': 'GET',
       headers: { 'Content-Type': 'applications/json' }
     }).then(resp => resp.json())
   }
   static GetAnnonce(id) {
-    return fetch(`http://127.0.0.1:5000/get_annonce_user/${id}`, {
+    return fetch(`http://127.0.0.1:5000/get_annonce/${id}`, {
+      'method': 'GET',
+      headers: { 'Content-Type': 'applications/json' }
+    }).then(resp => resp.json())
+  }
+  static GetFullAnnonce(id) {
+    return fetch(`http://127.0.0.1:5000/get_full_annonce/${id}`, {
       'method': 'GET',
       headers: { 'Content-Type': 'applications/json' }
     }).then(resp => resp.json())
   }
   static AddAnnonce(body) {
-    return fetch('http://127.0.0.1:5000/add_annonce', {
+    return fetch('http://127.0.0.1:5000/add', {
       'method': 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     }).then(resp => resp.json())
   }
-  static AddImage(data, id) {
-    return fetch(`http://127.0.0.1:5000/upload/${id}`, {
+  static AddImage(data, id,num) {
+    return fetch(`http://127.0.0.1:5000/upload/${id}/${num}`, {
       method: ['POST'],
       body: data,
     })
@@ -94,4 +100,9 @@ export default class APIService {
         body:JSON.stringify(body)
     }).then(resp=>resp.json())
 }
-}
+static GetWilaya(id) {
+  return fetch(`http://127.0.0.1:5000/getwilaya/${id}`, {
+    'method': 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(resp => resp.json())
+}}

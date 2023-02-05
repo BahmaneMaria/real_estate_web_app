@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Avatar from "@material-ui/core/Avatar";
 import MenuIcon from "@material-ui/icons/Menu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AddCircleOutline } from "@material-ui/icons";
 const Container = styled.div`
   height: 40px;
@@ -38,15 +38,16 @@ const MenuItem = styled.div`
   margin-left: 25px;
 `;
 
-export default function Navbar() {
+export default function Navbar({id}) {
+  let nav = useNavigate();
   return (
     <Container>
       <Left>
         <Logo src="https://www.hicom.fr/wp-content/uploads/2017/09/Logo_TV_2015.png" />
-        <AppName>Name</AppName>
+        <AppName>RealEstate</AppName>
       </Left>
       <Right>
-        <MenuItem>
+        <MenuItem onClick={`/Profile/${id}`}>
           <Avatar />
         </MenuItem>
         <MenuItem>

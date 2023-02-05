@@ -29,11 +29,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow 
 from sqlalchemy import insert
 #--------------------------------------------------------
-from nlp import mot_cles , context , extract_filter
-import numpy as np
 
-#pip install spacy
-#python -m spacy download fr_core_news_md
 
 
 app = Flask(__name__)
@@ -45,9 +41,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.secret_key = os.urandom(32)
 app.config['SECRET_KEY'] = 'your secret key'
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"]="1"
-# Initalize The Database
-UPLOAD_FOLDER = "frontend/src/static/images/"
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 GOOGLE_CLIENT_ID ="418126861632-1r2dbg7v8h4fu792sfnjmdr0i5r440rb.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client_secret.json")
@@ -199,6 +192,10 @@ def get_wilayas():
     results=wilayas_schema.dump(all_wilayas)
     return jsonify(results)
 
+@app.route('/getwilaya/<id>',methods=['GET'])
+def get_wilaya(id):
+    wilaya=Wilayas.query.get(id)
+    return wilaya_schema.jsonify(wilaya)
 
 #class commune:
 class Communes(db.Model):
@@ -214,7 +211,7 @@ class Communes(db.Model):
 
 class CommunesSchema(ma.Schema):
     class Meta:
-        fields=('id','code_postal','nom','id_wilaya')
+        fields=('id','code_postal','nom','wilaya_id')
 
 commune_schema=CommunesSchema()
 communes_schema=CommunesSchema(many=True)
@@ -287,82 +284,57 @@ class Annonce(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     id_categorie=db.Column(db.Integer())
     id_type_bien_immobilier=db.Column(db.Integer())
-    id_wilaya=db.Column(db.Integer())
     surface=db.Column(db.Float())
     prix=db.Column(db.Float())
-    id_wilaya =db.Column(db.Integer())
     id_commune=db.Column(db.Integer())
     address=db.Column(db.String(255))
-    title = db.Column(db.Text())
     description=db.Column(db.Text())
     date_creation=db.Column(db.Date(),default=date.today())
     heure_creation=db.Column(db.DateTime(),default=datetime.datetime.now)
     id_utilisateur=db.Column(db.Integer())
     num_tlp=db.Column(db.String(10))
-    #image
-    multi_pics = db.Column(db.Boolean())
-    annonce_pic = db.Column(db.Text())
-    # tags and keywords (for research)
-    key_words = db.Column(db.Text())
-    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_wilaya,id_commune,address,title,description,id_utilisateur,num_tlp, multi_pics, annonce_pic , key_words):
+    nb=db.Column(db.Integer())
+    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_commune,address,description,id_utilisateur,num_tlp,nb):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
         self.surface=surface
-        self.id_wilaya = id_wilaya
         self.prix=prix
-        self.id_wilaya = id_wilaya
         self.id_commune=id_commune
         self.address=address
-        self.title = title
         self.description=description
         self.id_utilisateur=id_utilisateur
         self.num_tlp=num_tlp
-        self.multi_pics = multi_pics
-        self.annonce_pic = annonce_pic
-        self.key_words = key_words
+        self.nb=nb
 
 class AnnonceSchema(ma.Schema):
     class Meta:
-        fields=('id','id_categorie','id_wilaya','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','multi_pics','annonce_pic','key_words')
+        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','nb')
 
 annonce_schema=AnnonceSchema()
 annonces_schema=AnnonceSchema(many=True)
 
-#get toutes les annonces
-@app.route('/get_annonces',methods=['GET'])
+
+@app.route('/get_annonce',methods=['GET'])
 def get_Annonces():
     all_Annonces=Annonce.query.all()
     results=annonces_schema.dump(all_Annonces)
     return jsonify(results)
 
-#get annonce par utilisateur
-@app.route('/get_annonce_user/<id>',methods=['GET'])
+@app.route('/get_full_annonce/<id>',methods=['GET'])
+def get_full_Annonce(id):
+    annonce=Annonce.query.get(id)
+    results=annonce_schema.dump(annonce)
+    return jsonify(results)
+
+
+@app.route('/get_annonce/<id>',methods=['GET'])
 def get_annonce(id):
     annonces=Annonce.query.filter_by(id_utilisateur=id)
     results=annonces_schema.dump(annonces)
     return jsonify(results)
 
-#get une annonce selon le id
-@app.route('/get_annonce/<id>/',methods=['GET'])
-def post_details(id):
-    annonce=Annonce.query.get(id)
-    return annonce_schema.jsonify(annonce)
 
-
-#get les annonces d'une categorie
-@app.route('/get_annonce/categorie/<categorie>',methods=['GET'])
-def get_annonces_categorie(categorie):
-    #premierment trouver le id de la categorie correspandante 
-    #puis trouver les annonces qui on cette id
-    id_categorie = Categorie.query.filter(Categorie.nom == str(categorie))
-    all_Annonces=Annonce.query.filter(Annonce.id_categorie == id_categorie).all()
-    #all_Annonces=Annonce.query.filter(Annonce.description == str("categorie")).all()
-    results=annonces_schema.dump(all_Annonces)
-    return jsonify(results)
-
-
-#ajout annonce
-@app.route('/add_annonce',methods=['POST'])
+@app.route('/add',methods=['POST'])
 def add_Annonces():
     id_categorie=Categorie.query.filter_by(nom=request.json['categorie']).first().id
     id_type_bien_immobilier=Type_bien_immobilier.query.filter_by(nom=request.json['type_bien']).first().id
@@ -373,7 +345,8 @@ def add_Annonces():
     description=request.json['description']
     id_utilisateur=request.json['id_user']
     num_tlp=request.json['num_tlp']
-    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp)
+    nb=request.json['nb_images']
+    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb)
     db.session.add(annonce)
     db.session.commit()
     return annonce_schema.jsonify(annonce)
@@ -386,6 +359,50 @@ def delete_Annonce(id):
     db.session.commit()
     return annonce_schema.jsonify(annonce)
 
+#class images:
+class Images(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    data = db.Column(db.LargeBinary(),nullable=False)
+    nom = db.Column(db.String(50), nullable=False)
+    mimetype = db.Column(db.Text(), nullable=False)
+    id_annonce = db.Column(db.Integer())
+    num= db.Column(db.Integer())
+
+class ImagesSchema(ma.Schema):
+    class Meta:
+        fields=('id','data','nom','mimtype','id_annonce','num')
+
+image_schema=ImagesSchema()
+images_schema=ImagesSchema(many=True)
+
+@app.route('/upload/<id>/<num>', methods=['POST'])
+def upload(id,num):
+    pic = request.files['pic']
+    if not pic:
+        return 'No pic uploaded!', 400
+    
+    img = Images(data=pic.read(), nom=pic.filename, mimetype=pic.mimetype,id_annonce=id,num=num)
+    db.session.add(img)
+    db.session.commit()
+
+    return 'Img Uploaded!', 200
+
+
+@app.route('/getimage/<id>/<num>',methods=['GET'])
+def get_img(id,num):
+    img = Images.query.filter_by(id_annonce=id,num=num).first()
+    if not img:
+        img = Images.query.get(0)
+        return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
+
+    return send_file(BytesIO(img.data),mimetype=img.mimetype,download_name=img.nom)
+
+@app.route('/delete_image/<id>/',methods=['DELETE'])
+def delete_Images(id):
+    img=Images.query.filter_by(id_annonce=id).first()
+    db.session.delete(img)
+    db.session.commit()
+    return 'Done',200
 
 @app.route('/get_utilidateur/<id>',methods=['GET'])
 def get_utilisateur(id):
@@ -440,10 +457,6 @@ def Get_full_Annonce(ANNONCE_ID):
     CATEGORIE =Get_Categorie(ANNONCE.id_categorie)
     COMMUNE,WILAYA =Get_Commune_Wilaya(ANNONCE.id_commune)
     Nom, Prenom,Email,Adresse,telephone= Get_User(ANNONCE.id_utilisateur)
-    COMMUNE_annonceur,WILAYA_annonceur =Get_Commune_Wilaya(Adresse)
-    pic_filename= secure_filename('wp.jpg')
-    pic_name = str(uuid.uuid1())+"_"+pic_filename
-    file = 'wp.jpg'
     return {
         'ID': ANNONCE_ID,
         'TYPE': TYPE,
@@ -460,10 +473,10 @@ def Get_full_Annonce(ANNONCE_ID):
         'Email': Email,
         'Adresse': Adresse,
         'telephone':telephone,
-        'WILAYA_annonceur':WILAYA_annonceur,
-        'COMMUNE_annonceur':COMMUNE_annonceur,
+        'WILAYA_annonceur':Adresse,
+        'COMMUNE_annonceur':Adresse,
         'Adresse':ANNONCE.address,
-        'pic_name' :file
+        'nb': Annonce.nb
 
     }
 #------------Table Images -----------
@@ -495,7 +508,7 @@ def Get_id():
 
 @app.route('/Send')
 def send():
-   Commune,wilaya=Get_Commune_Wilaya(2)
+   Commune,wilaya=Get_Commune_Wilaya(200)
    return wilaya
 
 @app.route('/Get_Images', methods = ['POST','GET'])
@@ -506,74 +519,6 @@ def IMG():
     imgs = imagestable.query.filter_by(id_annonce=int(id_Annonce))
     results=images_schema.dump(imgs)
     return jsonify(results)
-
-
-#add annonce to the data
-@app.route('/add_annonce2', methods= ['POST'])
-def add_annonce2():
-    # get Images
-    annonce_pics = request.files.getlist("pics") 
-    # get annonce details
-    id_user=request.json['id_user']
-    title=request.json['title']
-    description=request.json['description']
-    id_categorie=Categorie.query.filter_by(nom=request.json['categorie']).first().id
-    id_type_bien_immobilier=Type_bien_immobilier.query.filter_by(nom=request.json['type_bien']).first().id
-    surface=request.json['surface']
-    prix=request.json['prix']
-    id_wilaya=Wilayas.query.filter_by(nom=request.json['wilaya']).first().id
-    id_commune=Communes.query.filter_by(nom=request.json['commune']).first().id
-    address=request.json['address']
-    num_tlp=request.json['num_tlp']
-    #generate key words 
-    key_words = mot_cles(title)
-    #list of images names
-    pics_names = list()
-
-    default = False
-    i=0
-    for file in annonce_pics :
-        if (i==0) : 
-            if(file.filename == '') : 
-                multi_pics = False
-                default = True
-                pics_names.append("default_pic_name.png")
-            else : 
-                multi_pics = False
-                pic_filename = secure_filename(annonce_pics[i].filename)
-                pics_names.append(str(uuid.uuid1()) + "_" +pic_filename)
-        else : 
-            multi_pics = True
-            pic_filename = secure_filename(annonce_pics[i].filename)
-            pics_names.append(str(uuid.uuid1()) + "_" +pic_filename)
-        i = i + 1
-
-    annonce = Annonce(id_categorie,id_type_bien_immobilier,surface, prix,id_wilaya, id_commune, address , title , description , id_user , num_tlp , multi_pics , pics_names[0] , key_words)
-    #add it to the data
-    db.session.add(annonce)
-    #envoyer l'annonce pour ensuite on puisse retourner le id de l'annonce
-    db.session.commit()
-    
-    if (multi_pics == True) :
-        i = 0
-        for file in annonce_pics : 
-            if (i !=  0) : # la deuxieme photo
-                image = imagestable( nom=pics_names[i], id_annonce = annonce.id_annonce ,)
-                db.session.add(image)
-            i = i+1
-    db.session.commit()
-
-    i=0
-    for file in annonce_pics :
-        if(i == 0):
-            if(default == False):
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'],pics_names[i]))
-        else : 
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],pics_names[i]))
-        i = i + 1
-
-    return "l'annonce a été ajouté avec succes"
-
 
 
 if __name__ == "__main__":

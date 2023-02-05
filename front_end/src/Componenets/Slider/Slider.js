@@ -1,50 +1,57 @@
 import { useEffect, useRef, useState } from "react";
-import images from "./imagefolder";
 import "./Slider.css";
-import styled from "styled-components";
-//import Slider from 'react-slick';
-
-
-function importAll(r) {
-  let images = {};
-  r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
-  return images;
-}
-
-
-const Container = styled.div`
-margin-top: 3rem;
-    display: flex;
-    flex-wrap: wrap; 
-    flex-flow: wrap;
-    justify-content:center;
-    transition: var(--transition);
-    margin:10px;
-`;
-
-
-
+import { useParams } from "react-router";
+import APIService from "../APIService";
  
-export const Slider= ({TheAnnonce_id})  => {
-  const images = importAll(require.context("../../pages/static/images", false, /\.(png|jpe?g|svg)$/));
+export const Slider= ()  => {
   const caroussel = useRef();
   const [width, setWidth] = useState(0);
-
-
+  const { id } = useParams();
   const [Annonce_Pic, setAnnonce_Pic] = useState([])
-  const Get_images = () =>{
-    fetch('http://127.0.0.1:5000/Get_Images' , {
-        method :'POST',
-        body:JSON.stringify({
-        Annonce_ID: TheAnnonce_id
-        }), 
-        header : { "Content-type": "application/json; charset=UTF-8"}
-    }).then(response => response.json()).then (message => setAnnonce_Pic(message))}
-    // Envoyer id de l'annonce au backend pour recuperer l'annonce
-    useEffect(() => {
-       Get_images();  
-       setWidth(caroussel.current.scrollWidth - caroussel.current.offsetWidth);
-    }, []);
+
+  const [Annonce, setAnnonce] = useState(
+    {
+      id: 0,
+      id_categorie: 0,
+      id_type_bien_immobilier: 0,
+      surface: 0.0,
+      prix: 0.0,
+      id_commune: 0,
+      address: '',
+      description: '',
+      date_creation: '',
+      id_utilisateur: 0,
+      num_tlp: '',
+      nb: 0,
+    }
+  );
+  const Get_images = (j) =>{
+    for(let i=0;i<j;i++)
+    {
+      Annonce_Pic.push(`http://127.0.0.1:5000/getimage/${id}/${i}`);
+    }  
+    };
+  useEffect(() => {
+    APIService.GetFullAnnonce(id).then(resp => {
+      const a = {
+        id: resp.id, id_categorie: resp.id_categorie,
+        id_type_bien_immobilier: resp.id_type_bien_immobilier,
+        surface: resp.surface,
+        prix: resp.prix,
+        id_commune: resp.id_commune,
+        address: resp.address,
+        description: resp.description,
+        date_creation: resp.date_creation,
+        id_utilisateur: resp.id_utilisateur,
+        num_tlp: resp.num_tlp,
+        nb: resp.nb,
+      }; setAnnonce(a);  Get_images(resp.nb);
+      setWidth(caroussel.current.scrollWidth - caroussel.current.offsetWidth);
+    });
+
+  }, [])
+
+
 
 
     return (
@@ -55,13 +62,13 @@ export const Slider= ({TheAnnonce_id})  => {
             dragConstraints={{ right: 0, left: -width }}
             className="inner-carousel"
           >
-            {Annonce_Pic.map((Pic) => {
+            {Annonce_Pic.map((image) => {
               return (
                 <x className="item">
-                  <img src={images[String(Pic.nom)]} alt={""} />
+                  <img src={image} />
                 </x>
-              );
-            })}
+            );}
+            )}
           </x>
         </x>
       </div>

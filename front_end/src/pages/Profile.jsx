@@ -10,7 +10,7 @@ const Profile = () => {
   const { id } = useParams();
   return (
     <div style={{ backgroundColor: "#f7f7f7" }}>
-      <NavBar/>
+      <NavBar id={id}/>
       <ProfileInfo />
       <ProfileContenu />
       <AnnonceSlider />
