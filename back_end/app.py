@@ -289,6 +289,7 @@ class Annonce(db.Model):
     id_wilaya =db.Column(db.Integer())
     id_commune=db.Column(db.Integer())
     address=db.Column(db.String(255))
+    title = db.Column(db.Text())
     description=db.Column(db.Text())
     date_creation=db.Column(db.Date(),default=date.today())
     heure_creation=db.Column(db.DateTime(),default=datetime.datetime.now)
@@ -299,7 +300,7 @@ class Annonce(db.Model):
     annonce_pic = db.Column(db.Text())
     # tags and keywords (for research)
     key_words = db.Column(db.Text())
-    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_wilaya,id_commune,address,description,id_utilisateur,num_tlp, multi_pics, annonce_pic , key_words):
+    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_wilaya,id_commune,address,title,description,id_utilisateur,num_tlp, multi_pics, annonce_pic , key_words):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
         self.surface=surface
@@ -308,6 +309,7 @@ class Annonce(db.Model):
         self.id_wilaya = id_wilaya
         self.id_commune=id_commune
         self.address=address
+        self.title = title
         self.description=description
         self.id_utilisateur=id_utilisateur
         self.num_tlp=num_tlp
@@ -543,6 +545,73 @@ def IMG():
     imgs = imagestable.query.filter_by(id_annonce=int(id_Annonce))
     results=images_schema.dump(imgs)
     return jsonify(results)
+
+
+#add annonce to the data
+@app.route('/add_annonce2', methods= ['POST'])
+def add_annonce2():
+    # get Images
+    annonce_pics = request.files.getlist("pics") 
+    # get annonce details
+    id_user=request.json['id_user']
+    title=request.json['title']
+    description=request.json['description']
+    id_categorie=Categorie.query.filter_by(nom=request.json['categorie']).first().id
+    id_type_bien_immobilier=Type_bien_immobilier.query.filter_by(nom=request.json['type_bien']).first().id
+    surface=request.json['surface']
+    prix=request.json['prix']
+    id_wilaya=Wilayas.query.filter_by(nom=request.json['wilaya']).first().id
+    id_commune=Communes.query.filter_by(nom=request.json['commune']).first().id
+    address=request.json['address']
+    num_tlp=request.json['num_tlp']
+    #generate key words 
+    key_words = mot_cles(title)
+    #list of images names
+    pics_names = list()
+
+    default = False
+    i=0
+    for file in annonce_pics :
+        if (i==0) : 
+            if(file.filename == '') : 
+                multi_pics = False
+                default = True
+                pics_names.append("default_pic_name.png")
+            else : 
+                multi_pics = False
+                pic_filename = secure_filename(annonce_pics[i].filename)
+                pics_names.append(str(uuid.uuid1()) + "_" +pic_filename)
+        else : 
+            multi_pics = True
+            pic_filename = secure_filename(annonce_pics[i].filename)
+            pics_names.append(str(uuid.uuid1()) + "_" +pic_filename)
+        i = i + 1
+
+    annonce = Annonce(id_categorie,id_type_bien_immobilier,surface, prix,id_wilaya, id_commune, address , title , description , id_user , num_tlp , multi_pics , pics_names[0] , key_words)
+    #add it to the data
+    db.session.add(annonce)
+    #envoyer l'annonce pour ensuite on puisse retourner le id de l'annonce
+    db.session.commit()
+    
+    if (multi_pics == True) :
+        i = 0
+        for file in annonce_pics : 
+            if (i !=  0) : # la deuxieme photo
+                image = imagestable( nom=pics_names[i], id_annonce = annonce.id_annonce ,)
+                db.session.add(image)
+            i = i+1
+    db.session.commit()
+
+    i=0
+    for file in annonce_pics :
+        if(i == 0):
+            if(default == False):
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],pics_names[i]))
+        else : 
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],pics_names[i]))
+        i = i + 1
+
+    return "l'annonce a été ajouté avec succes"
 
 
 if __name__ == "__main__":
