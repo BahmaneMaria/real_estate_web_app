@@ -29,7 +29,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow 
 from sqlalchemy import insert
 #--------------------------------------------------------
-
+from nlp import mot_cles , context , extract_filter
+import numpy as np
 
 
 app = Flask(__name__)
