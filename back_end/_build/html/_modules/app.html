@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app &mdash; RealEstate 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RealEstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">back_end</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RealEstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for app</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span><span class="n">jsonify</span><span class="p">,</span><span class="n">request</span><span class="p">,</span><span class="n">send_file</span><span class="p">,</span> <span class="n">blueprints</span>
+<span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">flask_marshmallow</span> <span class="kn">import</span> <span class="n">Marshmallow</span>
+<span class="kn">from</span> <span class="nn">flask_cors</span> <span class="kn">import</span> <span class="n">CORS</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">secure_filename</span>
+<span class="c1">#from auth import auth</span>
+<span class="c1">#--------------------- Packages for authentification page --------------</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">flask.wrappers</span> <span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">redirect</span>
+<span class="kn">import</span> <span class="nn">google</span> 
+<span class="kn">from</span> <span class="nn">flask_cors</span> <span class="kn">import</span> <span class="n">CORS</span>
+<span class="kn">from</span> <span class="nn">tokenize</span> <span class="kn">import</span> <span class="n">generate_tokens</span>
+<span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">google.oauth2</span> <span class="kn">import</span> <span class="n">id_token</span>
+<span class="kn">from</span> <span class="nn">google_auth_oauthlib.flow</span> <span class="kn">import</span> <span class="n">Flow</span>
+<span class="kn">from</span> <span class="nn">pip._vendor</span> <span class="kn">import</span> <span class="n">cachecontrol</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">google.auth.transport.requests</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">json</span><span class="p">,</span><span class="n">jsonify</span>
+<span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<span class="kn">from</span> <span class="nn">flask_marshmallow</span> <span class="kn">import</span> <span class="n">Marshmallow</span> 
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">insert</span>
+<span class="c1">#--------------------------------------------------------</span>
+
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">CORS</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SQLALCHEMY_DATABASE_URI&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;mysql://root:&#39;&#39;@localhost/tp_bdd&#39;</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SQLALCHEMY_TRACK_MODIFICATIONS&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+<span class="c1">#------------- configurations for auth ---------------------</span>
+<span class="n">app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your secret key&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OAUTHLIB_INSECURE_TRANSPORT&quot;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;1&quot;</span>
+
+<span class="n">GOOGLE_CLIENT_ID</span> <span class="o">=</span><span class="s2">&quot;418126861632-1r2dbg7v8h4fu792sfnjmdr0i5r440rb.apps.googleusercontent.com&quot;</span>
+<span class="n">client_secrets_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;client_secret.json&quot;</span><span class="p">)</span>
+<span class="n">BACKEND_URL</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:5000&quot;</span>
+<span class="n">FRONTEND_URL</span><span class="o">=</span><span class="s2">&quot;http://localhost:3000/Profile&quot;</span>
+
+<span class="n">flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="o">.</span><span class="n">from_client_secrets_file</span><span class="p">(</span>
+    <span class="n">client_secrets_file</span> <span class="o">=</span> <span class="n">client_secrets_file</span><span class="p">,</span>
+    <span class="n">scopes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://www.googleapis.com/auth/userinfo.profile&quot;</span><span class="p">,</span> <span class="s2">&quot;https://www.googleapis.com/auth/userinfo.email&quot;</span><span class="p">,</span> <span class="s2">&quot;openid&quot;</span><span class="p">],</span>
+    <span class="n">redirect_uri</span> <span class="o">=</span> <span class="s2">&quot;http://127.0.0.1:5000/callback&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="c1">#--------------------end configurations-------------------------</span>
+
+
+
+
+<span class="c1">#app.register_blueprint(auth, url_prefix=&#39;/&#39;)</span>
+
+<span class="n">db</span><span class="o">=</span><span class="n">SQLAlchemy</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<span class="n">ma</span><span class="o">=</span><span class="n">Marshmallow</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="c1">#------------Utilisateurs------------</span>
+<div class="viewcode-block" id="table_utilisateurs"><a class="viewcode-back" href="../app.html#app.table_utilisateurs">[docs]</a><span class="k">class</span> <span class="nc">table_utilisateurs</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">Id_User</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Nom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
+    <span class="n">Prenom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
+    <span class="n">Email</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">Adresse</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+    <span class="n">telephone</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">Lien_Image</span> <span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Nom</span><span class="p">,</span> <span class="n">Prenom</span><span class="p">,</span><span class="n">Email</span><span class="p">,</span><span class="n">Adresse</span><span class="p">,</span><span class="n">telephone</span><span class="p">,</span><span class="n">Lien_Image</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nom</span><span class="o">=</span><span class="n">Nom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Prenom</span><span class="o">=</span><span class="n">Prenom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Email</span><span class="o">=</span><span class="n">Email</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Adresse</span><span class="o">=</span><span class="n">Adresse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">telephone</span><span class="o">=</span><span class="n">telephone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lien_Image</span><span class="o">=</span><span class="n">Lien_Image</span></div>
+
+       
+
+<div class="viewcode-block" id="table_utilisateursSchema"><a class="viewcode-back" href="../app.html#app.table_utilisateursSchema">[docs]</a><span class="k">class</span> <span class="nc">table_utilisateursSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="table_utilisateursSchema.Meta"><a class="viewcode-back" href="../app.html#app.table_utilisateursSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Id_User&#39;</span><span class="p">,</span><span class="s1">&#39;Nom&#39;</span><span class="p">,</span> <span class="s1">&#39;Prenom&#39;</span><span class="p">,</span><span class="s1">&#39;Email&#39;</span><span class="p">,</span><span class="s1">&#39;Adresse&#39;</span><span class="p">,</span><span class="s1">&#39;telephone&#39;</span><span class="p">,</span><span class="s1">&#39;Lien_Image&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">table_utilisateur_schema</span><span class="o">=</span><span class="n">table_utilisateursSchema</span><span class="p">()</span>
+<span class="n">table_utilisateurs_schema</span><span class="o">=</span><span class="n">table_utilisateursSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1">#---------------------------------------------</span>
+<span class="c1">#--------------- authentification Part -----------------</span>
+<span class="c1">#------------------------------------------</span>
+
+<div class="viewcode-block" id="login_is_required"><a class="viewcode-back" href="../app.html#app.login_is_required">[docs]</a><span class="k">def</span> <span class="nf">login_is_required</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span> <span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;google_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">session</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">abort</span><span class="p">(</span><span class="mi">401</span><span class="p">)</span> <span class="c1"># ne pas autoriser la connexion</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<span class="c1">#------------- Login with google account -------------------</span>
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../app.html#app.login">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="c1"># create a session </span>
+   <span class="n">authorization_url</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">authorization_url</span><span class="p">()</span>
+   <span class="n">session</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span>
+   <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">response</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;auth_url&#39;</span><span class="p">:</span><span class="n">authorization_url</span><span class="p">}),</span>
+        <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1">#-------------------------------- Authentification----------------------------------</span>
+<div class="viewcode-block" id="callback"><a class="viewcode-back" href="../app.html#app.callback">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/callback&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">callback</span><span class="p">():</span>
+    <span class="n">flow</span><span class="o">.</span><span class="n">fetch_token</span><span class="p">(</span><span class="n">authorization_response</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+
+    
+    <span class="n">credentials</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">credentials</span>
+    <span class="n">request_session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+    <span class="n">cached_session</span> <span class="o">=</span> <span class="n">cachecontrol</span><span class="o">.</span><span class="n">CacheControl</span><span class="p">(</span><span class="n">request_session</span><span class="p">)</span>
+    <span class="n">token_request</span> <span class="o">=</span> <span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">cached_session</span><span class="p">)</span>
+
+    <span class="n">id_info</span> <span class="o">=</span> <span class="n">id_token</span><span class="o">.</span><span class="n">verify_oauth2_token</span><span class="p">(</span>
+        <span class="n">id_token</span><span class="o">=</span><span class="n">credentials</span><span class="o">.</span><span class="n">_id_token</span><span class="p">,</span>
+        <span class="n">request</span><span class="o">=</span><span class="n">token_request</span><span class="p">,</span>
+        <span class="n">audience</span><span class="o">=</span><span class="n">GOOGLE_CLIENT_ID</span>
+    <span class="p">)</span>
+    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;google_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
+    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">id_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">)</span>
+    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;picture&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">id_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;picture&#39;</span><span class="p">)</span>
+
+    <span class="c1"># rechercher l&#39;utilisateur dans la bdd</span>
+    <span class="n">exists</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">table_utilisateurs</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">Email</span><span class="o">=</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span>
+    <span class="c1"># s&#39;il existe on recupere son id </span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">exists</span><span class="p">):</span>
+        <span class="n">USER</span><span class="o">=</span> <span class="n">table_utilisateurs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">Email</span><span class="o">=</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">ID_USER</span><span class="o">=</span><span class="n">USER</span><span class="o">.</span><span class="n">Id_User</span>
+    <span class="c1">#sinon on insere l&#39;utilisateur dans la bdd</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">table_utilisateurs</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;picture&quot;</span><span class="p">])</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">USER</span><span class="o">=</span> <span class="n">table_utilisateurs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">Email</span><span class="o">=</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">ID_USER</span><span class="o">=</span><span class="n">USER</span><span class="o">.</span><span class="n">Id_User</span>
+    
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">FRONTEND_URL</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ID_USER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    
+    
+<span class="c1"># ------------------  logout -----------------</span>
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../app.html#app.logout">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/logout&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">response</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;Logged out&quot;</span><span class="p">}),</span>
+        <span class="n">status</span><span class="o">=</span><span class="mi">202</span><span class="p">,</span>
+        <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span>
+    <span class="p">)</span></div>
+
+<span class="c1">#--------------------------End Auth Part--------------------------------</span>
+
+<span class="c1">#-------------------------- Add Annonce Page + Profile Page ----------------------</span>
+
+<span class="c1">#class wilaya:</span>
+<div class="viewcode-block" id="Wilayas"><a class="viewcode-back" href="../app.html#app.Wilayas">[docs]</a><span class="k">class</span> <span class="nc">Wilayas</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">code</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">nom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">code</span><span class="p">,</span><span class="n">nom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">=</span><span class="n">code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nom</span><span class="o">=</span><span class="n">nom</span></div>
+
+<div class="viewcode-block" id="WilayasSchema"><a class="viewcode-back" href="../app.html#app.WilayasSchema">[docs]</a><span class="k">class</span> <span class="nc">WilayasSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="WilayasSchema.Meta"><a class="viewcode-back" href="../app.html#app.WilayasSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;code&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">wilaya_schema</span><span class="o">=</span><span class="n">WilayasSchema</span><span class="p">()</span>
+<span class="n">wilayas_schema</span><span class="o">=</span><span class="n">WilayasSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_wilayas"><a class="viewcode-back" href="../app.html#app.get_wilayas">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getwilaya&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_wilayas</span><span class="p">():</span>
+    <span class="n">all_wilayas</span><span class="o">=</span><span class="n">Wilayas</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">wilayas_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">all_wilayas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_wilaya"><a class="viewcode-back" href="../app.html#app.get_wilaya">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getwilaya/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_wilaya</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">wilaya</span><span class="o">=</span><span class="n">Wilayas</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wilaya_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">wilaya</span><span class="p">)</span></div>
+
+<span class="c1">#class commune:</span>
+<div class="viewcode-block" id="Communes"><a class="viewcode-back" href="../app.html#app.Communes">[docs]</a><span class="k">class</span> <span class="nc">Communes</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">code_postal</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">nom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+    <span class="n">wilaya_id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">INTEGER</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">code_postal</span><span class="p">,</span><span class="n">nom</span><span class="p">,</span><span class="n">wilaya_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">=</span><span class="n">code_postal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nom</span><span class="o">=</span><span class="n">nom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wilaya_id</span><span class="o">=</span><span class="n">wilaya_id</span></div>
+
+<div class="viewcode-block" id="CommunesSchema"><a class="viewcode-back" href="../app.html#app.CommunesSchema">[docs]</a><span class="k">class</span> <span class="nc">CommunesSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="CommunesSchema.Meta"><a class="viewcode-back" href="../app.html#app.CommunesSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;code_postal&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">,</span><span class="s1">&#39;wilaya_id&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">commune_schema</span><span class="o">=</span><span class="n">CommunesSchema</span><span class="p">()</span>
+<span class="n">communes_schema</span><span class="o">=</span><span class="n">CommunesSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_communes"><a class="viewcode-back" href="../app.html#app.get_communes">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getcommunes/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_communes</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">communes</span><span class="o">=</span><span class="n">Communes</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">wilaya_id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Communes</span><span class="o">.</span><span class="n">nom</span><span class="o">.</span><span class="n">asc</span><span class="p">())</span> <span class="c1"># asc</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">communes_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">communes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_commune"><a class="viewcode-back" href="../app.html#app.get_commune">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getcommune/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_commune</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">commune</span><span class="o">=</span><span class="n">Communes</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">commune_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">commune</span><span class="p">)</span></div>
+
+<span class="c1">#classe catégorie:</span>
+<div class="viewcode-block" id="Categorie"><a class="viewcode-back" href="../app.html#app.Categorie">[docs]</a><span class="k">class</span> <span class="nc">Categorie</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nom</span><span class="o">=</span><span class="n">nom</span></div>
+ 
+<div class="viewcode-block" id="CategorieSchema"><a class="viewcode-back" href="../app.html#app.CategorieSchema">[docs]</a><span class="k">class</span> <span class="nc">CategorieSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="CategorieSchema.Meta"><a class="viewcode-back" href="../app.html#app.CategorieSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">categorie_schema</span><span class="o">=</span><span class="n">CategorieSchema</span><span class="p">()</span>
+<span class="n">categories_schema</span><span class="o">=</span><span class="n">CategorieSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_categories"><a class="viewcode-back" href="../app.html#app.get_categories">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getcategories&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_categories</span><span class="p">():</span>
+    <span class="n">all_categories</span><span class="o">=</span><span class="n">Categorie</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">categories_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">all_categories</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_categorie"><a class="viewcode-back" href="../app.html#app.get_categorie">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getcategorie/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_categorie</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">categorie</span><span class="o">=</span><span class="n">Categorie</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">categorie_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">categorie</span><span class="p">)</span></div>
+    
+<span class="c1">#classe type bien immobilier</span>
+<div class="viewcode-block" id="Type_bien_immobilier"><a class="viewcode-back" href="../app.html#app.Type_bien_immobilier">[docs]</a><span class="k">class</span> <span class="nc">Type_bien_immobilier</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nom</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nom</span><span class="o">=</span><span class="n">nom</span></div>
+
+<div class="viewcode-block" id="Type_bien_immobilierSchema"><a class="viewcode-back" href="../app.html#app.Type_bien_immobilierSchema">[docs]</a><span class="k">class</span> <span class="nc">Type_bien_immobilierSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Type_bien_immobilierSchema.Meta"><a class="viewcode-back" href="../app.html#app.Type_bien_immobilierSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">Type_bien_immobilier_schema</span><span class="o">=</span><span class="n">WilayasSchema</span><span class="p">()</span>
+<span class="n">Types_bien_immobilier_schema</span><span class="o">=</span><span class="n">WilayasSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_types_bien_immobilier"><a class="viewcode-back" href="../app.html#app.get_types_bien_immobilier">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_Types_bien_immobilier&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_types_bien_immobilier</span><span class="p">():</span>
+    <span class="n">all_types</span><span class="o">=</span><span class="n">Type_bien_immobilier</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">Types_bien_immobilier_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">all_types</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_type_bien_immobilier"><a class="viewcode-back" href="../app.html#app.get_type_bien_immobilier">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_Type_bien_immobilier/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_type_bien_immobilier</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">Type_bien_immobilier</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Type_bien_immobilier_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span></div>
+
+<span class="c1">#class Annonce:</span>
+<div class="viewcode-block" id="Annonce"><a class="viewcode-back" href="../app.html#app.Annonce">[docs]</a><span class="k">class</span> <span class="nc">Annonce</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">id_categorie</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">id_type_bien_immobilier</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">surface</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Float</span><span class="p">())</span>
+    <span class="n">prix</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Float</span><span class="p">())</span>
+    <span class="n">id_commune</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">address</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Text</span><span class="p">())</span>
+    <span class="n">date_creation</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Date</span><span class="p">(),</span><span class="n">default</span><span class="o">=</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())</span>
+    <span class="n">heure_creation</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">DateTime</span><span class="p">(),</span><span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">id_utilisateur</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">num_tlp</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">nb</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">id_categorie</span><span class="p">,</span><span class="n">id_type_bien_immobilier</span><span class="p">,</span><span class="n">surface</span><span class="p">,</span><span class="n">prix</span><span class="p">,</span><span class="n">id_commune</span><span class="p">,</span><span class="n">address</span><span class="p">,</span><span class="n">description</span><span class="p">,</span><span class="n">id_utilisateur</span><span class="p">,</span><span class="n">num_tlp</span><span class="p">,</span><span class="n">nb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_categorie</span><span class="o">=</span><span class="n">id_categorie</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_type_bien_immobilier</span><span class="o">=</span><span class="n">id_type_bien_immobilier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">=</span><span class="n">surface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prix</span><span class="o">=</span><span class="n">prix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_commune</span><span class="o">=</span><span class="n">id_commune</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="o">=</span><span class="n">address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="o">=</span><span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_utilisateur</span><span class="o">=</span><span class="n">id_utilisateur</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_tlp</span><span class="o">=</span><span class="n">num_tlp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb</span><span class="o">=</span><span class="n">nb</span></div>
+
+<div class="viewcode-block" id="AnnonceSchema"><a class="viewcode-back" href="../app.html#app.AnnonceSchema">[docs]</a><span class="k">class</span> <span class="nc">AnnonceSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="AnnonceSchema.Meta"><a class="viewcode-back" href="../app.html#app.AnnonceSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;id_categorie&#39;</span><span class="p">,</span><span class="s1">&#39;id_type_bien_immobilier&#39;</span><span class="p">,</span><span class="s1">&#39;surface&#39;</span><span class="p">,</span><span class="s1">&#39;prix&#39;</span><span class="p">,</span><span class="s1">&#39;id_commune&#39;</span><span class="p">,</span><span class="s1">&#39;address&#39;</span><span class="p">,</span><span class="s1">&#39;description&#39;</span><span class="p">,</span><span class="s1">&#39;date_creation&#39;</span><span class="p">,</span><span class="s1">&#39;heure_creation&#39;</span><span class="p">,</span><span class="s1">&#39;id_utilisateur&#39;</span><span class="p">,</span><span class="s1">&#39;num_tlp&#39;</span><span class="p">,</span><span class="s1">&#39;nb&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">annonce_schema</span><span class="o">=</span><span class="n">AnnonceSchema</span><span class="p">()</span>
+<span class="n">annonces_schema</span><span class="o">=</span><span class="n">AnnonceSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_Annonces"><a class="viewcode-back" href="../app.html#app.get_Annonces">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_annonce&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_Annonces</span><span class="p">():</span>
+    <span class="n">all_Annonces</span><span class="o">=</span><span class="n">Annonce</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">annonces_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">all_Annonces</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_full_Annonce"><a class="viewcode-back" href="../app.html#app.get_full_Annonce">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_full_annonce/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_full_Annonce</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">annonce</span><span class="o">=</span><span class="n">Annonce</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">annonce_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_annonce"><a class="viewcode-back" href="../app.html#app.get_annonce">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_annonce/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_annonce</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">annonces</span><span class="o">=</span><span class="n">Annonce</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">id_utilisateur</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">annonces_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">annonces</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_Annonces"><a class="viewcode-back" href="../app.html#app.add_Annonces">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/add&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">add_Annonces</span><span class="p">():</span>
+    <span class="n">id_categorie</span><span class="o">=</span><span class="n">Categorie</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">nom</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;categorie&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">id_type_bien_immobilier</span><span class="o">=</span><span class="n">Type_bien_immobilier</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">nom</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;type_bien&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">surface</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
+    <span class="n">prix</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;prix&#39;</span><span class="p">]</span>
+    <span class="n">id_commune</span><span class="o">=</span><span class="n">Communes</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">nom</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">address</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span>
+    <span class="n">id_utilisateur</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;id_user&#39;</span><span class="p">]</span>
+    <span class="n">num_tlp</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;num_tlp&#39;</span><span class="p">]</span>
+    <span class="n">nb</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;nb_images&#39;</span><span class="p">]</span>
+    <span class="n">annonce</span><span class="o">=</span><span class="n">Annonce</span><span class="p">(</span><span class="n">id_categorie</span><span class="p">,</span> <span class="n">id_type_bien_immobilier</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">prix</span><span class="p">,</span> <span class="n">id_commune</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">id_utilisateur</span><span class="p">,</span> <span class="n">num_tlp</span><span class="p">,</span><span class="n">nb</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">annonce_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="delete_Annonce"><a class="viewcode-back" href="../app.html#app.delete_Annonce">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/delete_annonce/&lt;id&gt;/&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">delete_Annonce</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">annonce</span><span class="o">=</span><span class="n">Annonce</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">annonce_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span></div>
+
+<span class="c1">#class images:</span>
+<div class="viewcode-block" id="Images"><a class="viewcode-back" href="../app.html#app.Images">[docs]</a><span class="k">class</span> <span class="nc">Images</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">LargeBinary</span><span class="p">(),</span><span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">nom</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Text</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">id_annonce</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span>
+    <span class="n">num</span><span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ImagesSchema"><a class="viewcode-back" href="../app.html#app.ImagesSchema">[docs]</a><span class="k">class</span> <span class="nc">ImagesSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="ImagesSchema.Meta"><a class="viewcode-back" href="../app.html#app.ImagesSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">,</span><span class="s1">&#39;mimtype&#39;</span><span class="p">,</span><span class="s1">&#39;id_annonce&#39;</span><span class="p">,</span><span class="s1">&#39;num&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">image_schema</span><span class="o">=</span><span class="n">ImagesSchema</span><span class="p">()</span>
+<span class="n">images_schema</span><span class="o">=</span><span class="n">ImagesSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="upload"><a class="viewcode-back" href="../app.html#app.upload">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload/&lt;id&gt;/&lt;num&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span><span class="n">num</span><span class="p">):</span>
+    <span class="n">pic</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s1">&#39;pic&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pic</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;No pic uploaded!&#39;</span><span class="p">,</span> <span class="mi">400</span>
+    
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Images</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">pic</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">nom</span><span class="o">=</span><span class="n">pic</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="n">pic</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span><span class="n">id_annonce</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="s1">&#39;Img Uploaded!&#39;</span><span class="p">,</span> <span class="mi">200</span></div>
+
+
+<div class="viewcode-block" id="get_img"><a class="viewcode-back" href="../app.html#app.get_img">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/getimage/&lt;id&gt;/&lt;num&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_img</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span><span class="n">num</span><span class="p">):</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Images</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">id_annonce</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">img</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Images</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">data</span><span class="p">),</span><span class="n">mimetype</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span><span class="n">download_name</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">nom</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">data</span><span class="p">),</span><span class="n">mimetype</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span><span class="n">download_name</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">nom</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="delete_Images"><a class="viewcode-back" href="../app.html#app.delete_Images">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/delete_image/&lt;id&gt;/&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">delete_Images</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">img</span><span class="o">=</span><span class="n">Images</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">id_annonce</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s1">&#39;Done&#39;</span><span class="p">,</span><span class="mi">200</span></div>
+
+<div class="viewcode-block" id="get_utilisateur"><a class="viewcode-back" href="../app.html#app.get_utilisateur">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_utilidateur/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_utilisateur</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">user</span><span class="o">=</span><span class="n">table_utilisateurs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">table_utilisateur_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">user</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="update_user"><a class="viewcode-back" href="../app.html#app.update_user">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/update_user/&lt;id&gt;&#39;</span><span class="p">,</span><span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PUT&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">update_user</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">user</span><span class="o">=</span><span class="n">table_utilisateurs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">Adresse</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span>
+    <span class="n">telephone</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;num_tlp&#39;</span><span class="p">]</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">Adresse</span><span class="o">=</span><span class="n">Adresse</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">telephone</span><span class="o">=</span><span class="n">telephone</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">table_utilisateur_schema</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">user</span><span class="p">)</span></div>
+
+
+<span class="c1">#---------------------------------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Get_Wilaya"><a class="viewcode-back" href="../app.html#app.Get_Wilaya">[docs]</a><span class="k">def</span> <span class="nf">Get_Wilaya</span><span class="p">(</span><span class="n">WILAYA_ID</span><span class="p">):</span>
+    <span class="n">WILAYA</span><span class="o">=</span><span class="n">Wilayas</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">WILAYA_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">WILAYA</span><span class="o">.</span><span class="n">nom</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Get_Commune_Wilaya"><a class="viewcode-back" href="../app.html#app.Get_Commune_Wilaya">[docs]</a><span class="k">def</span> <span class="nf">Get_Commune_Wilaya</span><span class="p">(</span><span class="n">COMMUNE_ID</span><span class="p">):</span>
+    <span class="n">COMMUNE</span><span class="o">=</span><span class="n">Communes</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">COMMUNE_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">COMMUNE</span><span class="o">.</span><span class="n">nom</span><span class="p">,</span> <span class="n">Get_Wilaya</span><span class="p">(</span><span class="n">COMMUNE</span><span class="o">.</span><span class="n">wilaya_id</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Get_Type"><a class="viewcode-back" href="../app.html#app.Get_Type">[docs]</a><span class="k">def</span> <span class="nf">Get_Type</span><span class="p">(</span><span class="n">TYPE_ID</span><span class="p">):</span>
+    <span class="n">TYPE</span><span class="o">=</span><span class="n">Type_bien_immobilier</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">TYPE_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">TYPE</span><span class="o">.</span><span class="n">nom</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Get_Categorie"><a class="viewcode-back" href="../app.html#app.Get_Categorie">[docs]</a><span class="k">def</span> <span class="nf">Get_Categorie</span><span class="p">(</span><span class="n">CATEGORIE_ID</span><span class="p">):</span>
+    <span class="n">CATEGORIE</span><span class="o">=</span><span class="n">Categorie</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">CATEGORIE_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">CATEGORIE</span><span class="o">.</span><span class="n">nom</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Get_User"><a class="viewcode-back" href="../app.html#app.Get_User">[docs]</a><span class="k">def</span> <span class="nf">Get_User</span><span class="p">(</span><span class="n">USER_ID</span><span class="p">):</span>
+    <span class="n">USER</span><span class="o">=</span> <span class="n">table_utilisateurs</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">Id_User</span><span class="o">=</span><span class="n">USER_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">USER</span><span class="o">.</span><span class="n">Nom</span><span class="p">,</span> <span class="n">USER</span><span class="o">.</span><span class="n">Prenom</span><span class="p">,</span><span class="n">USER</span><span class="o">.</span><span class="n">Email</span><span class="p">,</span><span class="n">USER</span><span class="o">.</span><span class="n">Adresse</span><span class="p">,</span><span class="n">USER</span><span class="o">.</span><span class="n">telephone</span></div>
+
+<span class="c1">#----------------- Fin BDD --------------</span>
+
+
+<span class="c1">#-----------Formaliser l&#39;annonce en JSON---------------</span>
+<div class="viewcode-block" id="Get_full_Annonce"><a class="viewcode-back" href="../app.html#app.Get_full_Annonce">[docs]</a><span class="k">def</span> <span class="nf">Get_full_Annonce</span><span class="p">(</span><span class="n">ANNONCE_ID</span><span class="p">):</span>
+    <span class="n">ANNONCE</span><span class="o">=</span><span class="n">Annonce</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">ANNONCE_ID</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">TYPE</span><span class="o">=</span><span class="n">Get_Type</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span> <span class="n">id_type_bien_immobilier</span><span class="p">)</span>
+    <span class="n">CATEGORIE</span> <span class="o">=</span><span class="n">Get_Categorie</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">id_categorie</span><span class="p">)</span>
+    <span class="n">COMMUNE</span><span class="p">,</span><span class="n">WILAYA</span> <span class="o">=</span><span class="n">Get_Commune_Wilaya</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">id_commune</span><span class="p">)</span>
+    <span class="n">Nom</span><span class="p">,</span> <span class="n">Prenom</span><span class="p">,</span><span class="n">Email</span><span class="p">,</span><span class="n">Adresse</span><span class="p">,</span><span class="n">telephone</span><span class="o">=</span> <span class="n">Get_User</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">id_utilisateur</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">ANNONCE_ID</span><span class="p">,</span>
+        <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="n">TYPE</span><span class="p">,</span>
+        <span class="s1">&#39;CATEGORIE&#39;</span> <span class="p">:</span> <span class="n">CATEGORIE</span><span class="p">,</span>
+        <span class="s1">&#39;COMMUNE&#39;</span><span class="p">:</span> <span class="n">COMMUNE</span><span class="p">,</span>
+        <span class="s1">&#39;WILAYA&#39;</span> <span class="p">:</span> <span class="n">WILAYA</span><span class="p">,</span>
+        <span class="s1">&#39;DATE&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">date_creation</span><span class="p">),</span>
+        <span class="s1">&#39;Instant_Annonce&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">heure_creation</span><span class="p">),</span>
+        <span class="s1">&#39;PRIX&#39;</span><span class="p">:</span> <span class="n">ANNONCE</span><span class="o">.</span><span class="n">prix</span><span class="p">,</span>
+        <span class="s1">&#39;SURFACE&#39;</span><span class="p">:</span> <span class="n">ANNONCE</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
+        <span class="s1">&#39;DESCRIPTION&#39;</span><span class="p">:</span> <span class="n">ANNONCE</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s1">&#39;Nom&#39;</span><span class="p">:</span><span class="n">Nom</span><span class="p">,</span>
+        <span class="s1">&#39;Prenom&#39;</span><span class="p">:</span> <span class="n">Prenom</span><span class="p">,</span>
+        <span class="s1">&#39;Email&#39;</span><span class="p">:</span> <span class="n">Email</span><span class="p">,</span>
+        <span class="s1">&#39;Adresse&#39;</span><span class="p">:</span> <span class="n">Adresse</span><span class="p">,</span>
+        <span class="s1">&#39;telephone&#39;</span><span class="p">:</span><span class="n">telephone</span><span class="p">,</span>
+        <span class="s1">&#39;WILAYA_annonceur&#39;</span><span class="p">:</span><span class="n">Adresse</span><span class="p">,</span>
+        <span class="s1">&#39;COMMUNE_annonceur&#39;</span><span class="p">:</span><span class="n">Adresse</span><span class="p">,</span>
+        <span class="s1">&#39;Adresse&#39;</span><span class="p">:</span><span class="n">ANNONCE</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+        <span class="s1">&#39;nb&#39;</span><span class="p">:</span> <span class="n">Annonce</span><span class="o">.</span><span class="n">nb</span>
+
+    <span class="p">}</span></div>
+<span class="c1">#------------Table Images -----------</span>
+<div class="viewcode-block" id="imagestable"><a class="viewcode-back" href="../app.html#app.imagestable">[docs]</a><span class="k">class</span> <span class="nc">imagestable</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nom</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>   
+    <span class="n">id_annonce</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="imagestableSchema"><a class="viewcode-back" href="../app.html#app.imagestableSchema">[docs]</a><span class="k">class</span> <span class="nc">imagestableSchema</span><span class="p">(</span><span class="n">ma</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="imagestableSchema.Meta"><a class="viewcode-back" href="../app.html#app.imagestableSchema.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;nom&#39;</span><span class="p">,</span><span class="s1">&#39;id_annonce&#39;</span><span class="p">)</span></div></div>
+
+<span class="n">imagestable_schema</span><span class="o">=</span><span class="n">imagestableSchema</span><span class="p">()</span>
+<span class="n">imagestable_schema</span><span class="o">=</span><span class="n">imagestableSchema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+
+
+
+
+<span class="c1"># send request from the frontend </span>
+<div class="viewcode-block" id="Get_id"><a class="viewcode-back" href="../app.html#app.Get_id">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/get_id&#39;</span><span class="p">,</span> <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span><span class="s1">&#39;GET&#39;</span><span class="p">]</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">Get_id</span><span class="p">():</span>
+    
+    <span class="n">request_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="nb">id</span><span class="o">=</span> <span class="n">request_data</span><span class="p">[</span><span class="s1">&#39;Annonce_ID&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Get_full_Annonce</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="send"><a class="viewcode-back" href="../app.html#app.send">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/Send&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">send</span><span class="p">():</span>
+   <span class="n">Commune</span><span class="p">,</span><span class="n">wilaya</span><span class="o">=</span><span class="n">Get_Commune_Wilaya</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">wilaya</span></div>
+
+<div class="viewcode-block" id="IMG"><a class="viewcode-back" href="../app.html#app.IMG">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/Get_Images&#39;</span><span class="p">,</span> <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">IMG</span><span class="p">():</span>
+    <span class="n">request_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">id_Annonce</span><span class="o">=</span> <span class="n">request_data</span><span class="p">[</span><span class="s1">&#39;Annonce_ID&#39;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">id_Annonce</span><span class="p">)</span>
+    <span class="n">imgs</span> <span class="o">=</span> <span class="n">imagestable</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">id_annonce</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">id_Annonce</span><span class="p">))</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">images_schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+     <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, TPIGL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
