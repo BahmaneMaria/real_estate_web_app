@@ -30,7 +30,7 @@ from flask_marshmallow import Marshmallow
 from sqlalchemy import insert
 #--------------------------------------------------------
 
-
+from nlp import mot_cles, context, extract_filter
 
 app = Flask(__name__)
 CORS(app)
@@ -197,6 +197,13 @@ def get_wilaya(id):
     wilaya=Wilayas.query.get(id)
     return wilaya_schema.jsonify(wilaya)
 
+@app.route('/getwilayacommune/<id>',methods=['GET'])
+def get_wilaya_commune(id):
+    id_wilaya = Communes.query.filter_by(id=id).first().wilaya_id
+    wilaya = Wilayas.query.get(id_wilaya)
+    return wilaya_schema.jsonify(wilaya)
+
+
 #class commune:
 class Communes(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
@@ -294,7 +301,8 @@ class Annonce(db.Model):
     id_utilisateur=db.Column(db.Integer())
     num_tlp=db.Column(db.String(10))
     nb=db.Column(db.Integer())
-    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_commune,address,description,id_utilisateur,num_tlp,nb):
+    key_words = db.Column(db.Text())
+    def __init__(self,id_categorie,id_type_bien_immobilier,surface,prix,id_commune,address,description,id_utilisateur,num_tlp,nb,key_words):
         self.id_categorie=id_categorie
         self.id_type_bien_immobilier=id_type_bien_immobilier
         self.surface=surface
@@ -305,10 +313,11 @@ class Annonce(db.Model):
         self.id_utilisateur=id_utilisateur
         self.num_tlp=num_tlp
         self.nb=nb
+        self.key_words = key_words
 
 class AnnonceSchema(ma.Schema):
     class Meta:
-        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','nb')
+        fields=('id','id_categorie','id_type_bien_immobilier','surface','prix','id_commune','address','description','date_creation','heure_creation','id_utilisateur','num_tlp','nb','key_words')
 
 annonce_schema=AnnonceSchema()
 annonces_schema=AnnonceSchema(many=True)
@@ -346,7 +355,8 @@ def add_Annonces():
     id_utilisateur=request.json['id_user']
     num_tlp=request.json['num_tlp']
     nb=request.json['nb_images']
-    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb)
+    key_words = mot_cles(description)
+    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb , key_words)
     db.session.add(annonce)
     db.session.commit()
     return annonce_schema.jsonify(annonce)
@@ -419,6 +429,113 @@ def update_user(id):
     db.session.commit()
     return table_utilisateur_schema.jsonify(user)
 
+@app.route('/annonces_search/<search>',methods=['GET'])
+def get_annonces_search(search):
+    annonces = Annonce.query.all()
+    res = []
+    if (str(search)!=''):
+        for annonce in annonces : 
+            if (context(str(annonce.key_words),search)):
+                res.append(annonce)
+    else :
+        res = annonces
+    resultat = annonces_schema.dump(res)
+    return jsonify(resultat)
+
+
+@app.route('/get_annonces_cat/<categorie>/',methods=['GET'])
+def get_annonces_cat(categorie):
+    id_categorie = Categorie.query.filter_by(nom=categorie).first().id
+    all_Annonces = Annonce.query.filter(Annonce.id_categorie == id_categorie).all()
+    results=annonces_schema.dump(all_Annonces)
+    return jsonify(results)
+
+
+@app.route('/annonces_search_filter/<filter>',methods=['GET'])
+def get_annonces_search_filter(filter):
+    search  = extract_filter(filter,"search=","&")
+    filter = filter.replace("search="+search+"&", '')
+
+    categorie = extract_filter(filter,"categorie=","&")
+    filter = filter.replace("categorie="+categorie+"&", '')
+
+    types = extract_filter(filter,"types=","&")
+    filter = filter.replace("types="+types+"&", '')
+    types = types.split("%")
+
+    wilayas = extract_filter(filter,"wilayas=","&")
+    filter = filter.replace("wilayas="+wilayas+"&", '')
+    wilayas = wilayas.split("%")
+
+    communes = extract_filter(filter,"communes=","&")
+    filter = filter.replace("communes="+communes+"&", '')
+    communes = communes.split("%")
+
+    stop = False
+
+    annonces = Annonce.query.all()
+    res = []
+    if search != '':
+        for annonce in annonces : 
+            if (context(str(annonce.key_words),search)):
+                res.append(annonce)
+    else : 
+        res = annonces
+
+    res2 = []
+    if categorie.lower() != "tout" : 
+        print(categorie)
+        id_categorie = Categorie.query.filter_by(nom = categorie).first().id
+        for annonce in res :
+            if str(annonce.id_categorie) == str(id_categorie):
+                print("oui")
+                res2.append(annonce)
+        if (len(res2) == 0) : 
+            stop = True
+    else:
+        res2 = res
+    
+    res3 = []
+    if types[0].lower() != "tous les types":
+        for type in types : 
+            id_type = Type_bien_immobilier.query.filter_by(nom = type).first().id
+            for annonce in res2 :
+                if str(annonce.id_type_bien_immobilier) == str(id_type):
+                    res3.append(annonce)
+        if (len(res3) == 0) : 
+            stop = True
+    else : 
+        res3 = res2
+
+    res4 = []
+    if wilayas[0].lower() != "" :
+        for wilaya in wilayas:
+            id_wilaya = Wilayas.query.filter_by(nom = wilaya).first().id
+            for annonce in res3 :
+                id_wil = Communes.query.filter_by(id=annonce.id_commune).first().wilaya_id
+                if str(id_wil) == str(id_wilaya):
+                    res4.append(annonce)
+        if (len(res4) == 0) : 
+            stop = True
+    else :
+        res4 = res3
+
+    res5 = []
+
+    if communes[0].lower() != "" :
+        for commune in communes:
+            id_commune = Communes.query.filter_by(nom = commune).first().id
+            for annonce in res4 :
+                if str(annonce.id_commune) == str(id_commune):
+                    res5.append(annonce)
+        if (len(res5) == 0) : 
+            stop = True
+    else :
+        res5 = res4
+        
+    resultat = annonces_schema.dump(res5)
+
+    return jsonify(resultat)
 
 #---------------------------------------------------------------------------------------------------------
 

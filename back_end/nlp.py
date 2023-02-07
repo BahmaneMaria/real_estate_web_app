@@ -14,6 +14,7 @@ stemmer = FrenchStemmer()
 from nltk.corpus import wordnet
 lang = 'fra'
 
+
 from spellchecker import SpellChecker
 spell = SpellChecker(language='fr')
 
@@ -142,4 +143,3 @@ def extract_filter(string , sub1 , sub2) :
     # getting elements in between
     res = string[idx1 + len(sub1) : idx2]
     return res
-

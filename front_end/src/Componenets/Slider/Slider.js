@@ -64,7 +64,7 @@ export const Slider= ()  => {
           >
             {Annonce_Pic.map((image) => {
               return (
-                <x className="item">
+                <x className="items">
                   <img src={image} />
                 </x>
             );}

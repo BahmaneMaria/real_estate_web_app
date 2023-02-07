@@ -97,7 +97,7 @@ const NouvelleAnnonce = (props) => {
   }, [idw,nb_images])
   const addAnnonce = () => {
     const id_user = user.id;
-    APIService.AddAnnonce({ address, description, id_user, categorie, commune, type_bien, num_tlp, prix, surface,nb_images }).then(resp => {
+    APIService.AddAnnonce({ address, description, id_user, categorie, commune, type_bien, num_tlp, prix, surface,nb_images}).then(resp => {
       if (images.length > 0) {
         images.forEach((image, i) => {
           const data = new FormData();

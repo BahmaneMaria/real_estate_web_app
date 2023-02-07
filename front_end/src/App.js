@@ -6,6 +6,12 @@ import PageAuth from "./pages/auth";
 import React from "react";
 import Affichage from './pages/Affichage';
 import Recherche from './pages/Recherche';
+import RecentAnnonces from './pages/RecentAnnonces'
+import SearchedAnnonces from './pages/SearchedAnnonces'
+import CategoriesAnnonces from './pages/CategoriesAnnonces'
+import SearchedFilterAnnonces from './pages/SearchedFilterAnnonces'
+
+
 function App() {
   
   return (
@@ -17,6 +23,10 @@ function App() {
           <Route path="/Profile/:id" element={<Profile />}></Route>
           <Route path="/recherche" element={<Recherche/>} />
           <Route path="/Affichage/:id" element={<Affichage/>} />
+          <Route path="/home" element={<RecentAnnonces/>}/>
+          <Route path='/searched/:search' element={<SearchedAnnonces/>}/>
+          <Route path = "/categorie/:type" element={<CategoriesAnnonces/>}/>
+          <Route path='/searchedfilter' element={<SearchedFilterAnnonces/>}/>
         </Routes>
       </div>
     </Router>
