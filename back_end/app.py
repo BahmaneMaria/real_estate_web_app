@@ -35,7 +35,7 @@ from nlp import mot_cles, context, extract_filter
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:''@localhost/tp_bdd'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:''@localhost/tp_igl'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 #------------- configurations for auth ---------------------
 app.secret_key = os.urandom(32)

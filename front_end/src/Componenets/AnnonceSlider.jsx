@@ -4,13 +4,12 @@ import APIService from "./APIService";
 import Annonce from "./Annonce";
 import { useParams } from "react-router-dom";
 const Container = styled.div`
-margin-top: 3rem;
-    display: flex;
-    flex-wrap: wrap; 
-    flex-flow: wrap;
-    justify-content:center;
-    transition: var(--transition);
-    margin:10px;
+padding:20px;
+display:grid;
+grid-template-rows: 1fr 1fr 1fr;
+grid-template-columns: 1fr 1fr 1fr; 
+gap: 1.7rem;
+transition: var(--transition);
 `;
 export default function AnnonceSlider() {
   const { id } = useParams();
