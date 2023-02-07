@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Avatar from "@material-ui/core/Avatar";
 import MenuIcon from "@material-ui/icons/Menu";
 import { Link, useNavigate } from "react-router-dom";
-import { AddCircleOutline } from "@material-ui/icons";
+import { AddCircleOutline, HomeOutlined } from "@material-ui/icons";
 const Container = styled.div`
   height: 40px;
   background-color: white;
@@ -51,7 +51,8 @@ export default function Navbar({id}) {
           <Avatar />
         </MenuItem>
         <MenuItem>
-            <AddCircleOutline fontSize="large" />
+        <Link to="/home"><HomeOutlined fontSize="large" /></Link>
+            
         </MenuItem>
         <MenuItem>
           <Link to="/">
