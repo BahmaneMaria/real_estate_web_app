@@ -9,6 +9,7 @@ import '../filter/filter.css'
 import { typeList ,categorieList, wilaya,communesAlger} from '../../data/data'
 import {useNavigate} from 'react-router-dom';
 import APIService from '../APIService'
+import Navbar from '../Navbar'
 
 const Header = () => {
 
@@ -24,7 +25,10 @@ const Header = () => {
     };
 
   return (
+    <div>
+      <Navbar/>
     <div className='header-container'>
+      
       {filter_active? 
         <div className="app"><Filter 
         handleClose={() => setFilter(!filter_active)} 
@@ -60,6 +64,7 @@ const Header = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }

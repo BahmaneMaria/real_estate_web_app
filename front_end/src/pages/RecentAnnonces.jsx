@@ -26,7 +26,6 @@ const RecentAnnonces = () => {
 
     return (
         <div>
-            <Navbar/>
           <Header/>
           <Categories/>
           <Annonces annonces = {AnnoncesList}/>
