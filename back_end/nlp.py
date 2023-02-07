@@ -1,6 +1,9 @@
 import nltk
 nltk.download('wordnet')
+<<<<<<< HEAD
 nltk.download('omw-1.4')
+=======
+>>>>>>> ceab6eef0d9711a8ae86ad073df508e4d3fd6bc3
 import spacy
 from nltk.stem.snowball import FrenchStemmer
 
