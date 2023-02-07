@@ -74,7 +74,7 @@ const NouvelleAnnonce = (props) => {
   const [images, setimages] = useState([]);
   const [communes, setcommunes] = useState();
   const [categorie, setcategorie] = useState('');
-  const [type_bien, settype_bien] = useState('');
+  const [type_bien, settype_bien] = useState('_ _ _');
   const [commune, setCommune] = useState('');
   const [address, setaddress] = useState();
   const [description, setdesc] = useState();
@@ -150,7 +150,7 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Type du bien:</Titre>
-            <select value={type_bien} style={{borderBottom:" 1px solid"}} onChange={(e) => { settype_bien(e.target.value) }}>
+            <select value={type_bien} placeholder="_ _ _" style={{borderBottom:" 1px solid"}} onChange={(e) => { settype_bien(e.target.value) }}>
               {
                 props.type_bien && props.type_bien.map((type_bien) => {
                   return (
@@ -195,11 +195,11 @@ const NouvelleAnnonce = (props) => {
           </FormItem>
           <FormItem>
             <Titre>Prix :</Titre>
-            <Input type="number" onChange={(e) => setprix(e.target.value)} />
+            <Input type="number" onChange={(e) => setprix(e.target.value)} /> DA
           </FormItem>
           <FormItem>
             <Titre>Surface :</Titre>
-            <Input type="number" onChange={(e) => setsurface(e.target.value)} />
+            <Input type="number" onChange={(e) => setsurface(e.target.value)} /> m²
           </FormItem>
           <FormItem>
             <Titre>Information annonceur :</Titre>

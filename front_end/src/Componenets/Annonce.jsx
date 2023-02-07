@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import APIService from './APIService'
 import { useNavigate } from 'react-router'
+import { AiOutlineClockCircle } from 'react-icons/ai'
 
 
 
@@ -13,10 +14,11 @@ function Annonce(props) {
   const [categorie, setcategorie] = useState();
   const [commune, setCommune] = useState();
   const [type_bien, settype_bien] = useState();
+  const [wilaya, setwilaya] = useState();
   useEffect(() => {
     APIService.GetCategorie(props.annonce.id_categorie).then(resp => setcategorie(resp.nom));
     APIService.GetType(props.annonce.id_type_bien_immobilier).then(resp => { settype_bien(resp.nom) });
-    APIService.GetCommune(props.annonce.id_commune).then(resp => setCommune(resp.nom))
+    APIService.GetCommune(props.annonce.id_commune).then(resp =>{setCommune(resp.nom);APIService.GetWilaya(resp.wilaya_id).then(r=>setwilaya(r.nom))})
   }, [])
 
   const deleteAnnonce = (annonce) => {
@@ -30,13 +32,14 @@ function Annonce(props) {
           <a className='annonce-surface'>{categorie} </a>
           <a className='annonce-surface'>{type_bien} </a>
           <a className='annonce-surface'>{commune} </a>
+          <a className='annonce-surface'>{wilaya} </a>
         </div>
         <div className='annonce-date'>
-          <LockClockSharp className='clock-icon' />
+        <AiOutlineClockCircle className='clock-icon' />
           <a>Mise le {props.annonce.date_creation}</a>
         </div>
         <a className='annonce-surface'>{props.annonce.surface} m²</a>
-        <h3 className='annonce-price'>{props.annonce.prix} da</h3>
+        <h3 className='annonce-price'>{props.annonce.prix} DA</h3>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
