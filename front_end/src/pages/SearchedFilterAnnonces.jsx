@@ -8,7 +8,6 @@ import Annonces from '../Componenets/annonces/Annonces'
 import Header from '../Componenets/header/Header'
 import Categories from '../Componenets/categories/Categories'
 import Footer from '../Componenets/Footer'
-import { wilaya } from '../data/data'
 
 
 
@@ -42,8 +41,6 @@ const SearchedFilterAnnonces = () => {
     <div>
       <Header/>
           <Categories/>
-          <div>{wilayas}</div>
-          <div>{filter}</div>
           <Annonces annonces = {AnnoncesList}/>
           <Footer/>
     </div>

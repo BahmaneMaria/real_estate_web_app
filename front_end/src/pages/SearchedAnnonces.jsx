@@ -6,8 +6,6 @@ import { useCallback } from 'react'
 import Header from '../Componenets/header/Header'
 import Categories from '../Componenets/categories/Categories'
 import Footer from '../Componenets/Footer'
-import NoResultFound from './NoResultFound'
-import { positions } from '@mui/system'
 
 
 
@@ -34,9 +32,7 @@ const SearchedAnnonces = () => {
         <div>
           <Header/>
           <Categories/>
-          <div>
-          { AnnoncesList.length === 0 ? <NoResultFound />: <Annonces annonces = {AnnoncesList}/>  }
-          </div>
+          <Annonces annonces = {AnnoncesList}/>
           <Footer/>
         </div>
     )

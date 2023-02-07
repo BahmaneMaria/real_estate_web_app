@@ -15,7 +15,6 @@ const Filter = (props) => {
   const [touschecked, settouschecked] = useState(true);
   var filter = "search="+props.search
 
-  const [userFilter, setUserFilter] = useState({userTypeChoice, userWilayaChoice , userCommuneChoice})
   const navigate =  useNavigate();
 
     const submitHandler = (e) =>{
@@ -112,10 +111,6 @@ const Filter = (props) => {
             value={wilaya.filter(obj => userWilayaChoice.includes(obj))} // set selected values
             onChange={handleChange} // assign onChange function
           />
-          <div>
-            wilaya:
-          </div>
-          <div>{JSON.stringify(userWilayaChoice, null, 2)}</div>
         </div>
         
         {userWilayaChoice.length === 1 ?
@@ -130,10 +125,6 @@ const Filter = (props) => {
               value={userWilayaChoice[0].communes.filter(obj => userCommuneChoice.includes(obj.value))} // set selected values
               onChange={handleChangeCommunes} // assign onChange function
             />
-            <div>
-            wilaya:
-          </div>
-          <div>{JSON.stringify(userCommuneChoice, null, 2)}</div>
           </div>
           : null}
       </div>
