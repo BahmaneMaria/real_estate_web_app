@@ -345,17 +345,22 @@ def get_annonce(id):
 
 @app.route('/add',methods=['POST'])
 def add_Annonces():
+    categorie = request.json['categorie']
     id_categorie=Categorie.query.filter_by(nom=request.json['categorie']).first().id
+    type = request.json['type_bien']
     id_type_bien_immobilier=Type_bien_immobilier.query.filter_by(nom=request.json['type_bien']).first().id
     surface=request.json['surface']
     prix=request.json['prix']
-    id_commune=Communes.query.filter_by(nom=request.json['commune']).first().id
+    commune = Communes.query.filter_by(nom=request.json['commune']).first()
+    id_commune = commune.id
+    wilaya = Wilayas.query.filter_by(id=commune.wilaya_id).first().nom
     address=request.json['address']
     description=request.json['description']
     id_utilisateur=request.json['id_user']
     num_tlp=request.json['num_tlp']
     nb=request.json['nb_images']
-    key_words = mot_cles(description)
+    key = str(categorie)+" "+str(type)+" "+str(wilaya)+" "+str(commune.nom)
+    key_words = mot_cles(key)
     annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb , key_words)
     db.session.add(annonce)
     db.session.commit()
@@ -470,8 +475,6 @@ def get_annonces_search_filter(filter):
     communes = extract_filter(filter,"communes=","&")
     filter = filter.replace("communes="+communes+"&", '')
     communes = communes.split("%")
-
-    stop = False
 
     annonces = Annonce.query.all()
     res = []

@@ -114,9 +114,12 @@ def solve(s1, s2):
 
 def context(string1, string2):
     res = False
+    res2 = False
 
     string_set = set(string1.split())
     list_set = set(string2.split())
+
+    list_set2 = set(return_spellcheck(string2).split())
 
     c = 0
     for i in list_set:
@@ -130,7 +133,19 @@ def context(string1, string2):
         if (c >= (len(list_set))) :
             res = True
 
-    return res
+    c2 = 0
+    for i in list_set2:
+        for word in string_set : 
+            if i in word :
+                c2+=1
+            else : 
+                if solve(i,word) :
+                    c2+=1
+    if (c2 >= 1):
+        if (c2 >= (len(list_set2))) :
+            res2 = True
+
+    return res or res2
 
 
 

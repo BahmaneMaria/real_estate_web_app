@@ -14,15 +14,16 @@ export const AnnoncesList = [{titre:"Location Terrain Agricole",surface:"12000mÂ
 const communesAdrar = [{ value: 'Adrar', label: "Adrar" },
 { value: 'oued semar', label: "Oued Semar" }]
 
-export const categorieList = ["Tout", "Echange", "Vente", "Location", "Location Vacances"]
+export const categorieList = ["Tout", "Vente", "Echange", "Location", "Location pour vacances"]
 export const wilaya = [{ value: 'Adrar', label: 'Adrar', communes: communesAdrar },
 { value: 'chlef', label: 'Chlef', communes: communesAdrar },
 { value: 'laghouat', label: 'Laghouat', communes: communesAdrar }]
 
 export const typeList = ["Tous les types",
-"Terrain",
-"Terrain Agricole",
-"Appartement",
 "Maison",
+"Appartement",
 "Bangalow",
-"Studio"];
+"Terrain Agricole",
+"Terrain",
+"Villa",
+"Duplexe"];
