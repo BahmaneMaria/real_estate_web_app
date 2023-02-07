@@ -131,7 +131,7 @@ def callback():
     id_info = id_token.verify_oauth2_token(
         id_token=credentials._id_token,
         request=token_request,
-        audience=GOOGLE_CLIENT_ID
+        audience=GOOGLE_CLIENT_ID,
     )
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
@@ -353,15 +353,15 @@ def add_Annonces():
     prix=request.json['prix']
     commune = Communes.query.filter_by(nom=request.json['commune']).first()
     id_commune = commune.id
-    wilaya = Wilayas.query.filter_by(id=commune.wilaya_id).first().nom
     address=request.json['address']
     description=request.json['description']
     id_utilisateur=request.json['id_user']
     num_tlp=request.json['num_tlp']
     nb=request.json['nb_images']
-    key = str(categorie)+" "+str(type)+" "+str(wilaya)+" "+str(commune.nom)
+    key = str(categorie)+" "+str(type)
     key_words = mot_cles(key)
-    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb , key_words)
+    key = key_words + commune.nom
+    annonce=Annonce(id_categorie, id_type_bien_immobilier, surface, prix, id_commune, address, description, id_utilisateur, num_tlp,nb , key)
     db.session.add(annonce)
     db.session.commit()
     return annonce_schema.jsonify(annonce)

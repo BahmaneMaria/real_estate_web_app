@@ -15,7 +15,6 @@ const Filter = (props) => {
   const [touschecked, settouschecked] = useState(true);
   var filter = "search="+props.search
 
-  const [userFilter, setUserFilter] = useState({userTypeChoice, userWilayaChoice , userCommuneChoice})
   const navigate =  useNavigate();
 
     const submitHandler = (e) =>{
