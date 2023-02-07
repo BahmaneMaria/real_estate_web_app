@@ -1,4 +1,5 @@
 import nltk
+nltk.download('wordnet')
 import spacy
 from nltk.stem.snowball import FrenchStemmer
 
