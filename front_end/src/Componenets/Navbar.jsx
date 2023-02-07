@@ -47,9 +47,6 @@ export default function Navbar({id}) {
         <AppName>RealEstate</AppName>
       </Left>
       <Right>
-        <MenuItem onClick={`/Profile/${id}`}>
-          <Avatar />
-        </MenuItem>
         <MenuItem>
         <Link to="/home"><HomeOutlined fontSize="large" /></Link>
             

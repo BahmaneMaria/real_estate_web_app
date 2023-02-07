@@ -4,6 +4,7 @@ import { useState , useEffect } from 'react'
 import Header from '../Componenets/header/Header'
 import Categories from '../Componenets/categories/Categories'
 import Footer from '../Componenets/Footer'
+import Navbar from '../Componenets/Navbar'
 
 
 const RecentAnnonces = () => {
@@ -25,6 +26,7 @@ const RecentAnnonces = () => {
 
     return (
         <div>
+            <Navbar/>
           <Header/>
           <Categories/>
           <Annonces annonces = {AnnoncesList}/>
